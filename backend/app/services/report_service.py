@@ -604,13 +604,16 @@ def generate_interview_pdf_report(db: Session, user: User, session_id: int) -> b
         q_card.append(ch_table)
 
         # Question prompt
-        q_body_rows = [
-            [Paragraph("<b>Question:</b>", table_header_style), Paragraph(q_text, card_text_style)],
-            [Paragraph("<b>Candidate Answer:</b>", table_header_style), Paragraph(a_text, card_text_style)],
-        ]
+        q_card.append(Spacer(1, 4))
+        q_card.append(Paragraph("<b>Question:</b>", table_header_style))
+        q_card.append(Paragraph(q_text, card_text_style))
+        q_card.append(Spacer(1, 6))
+
+        q_card.append(Paragraph("<b>Candidate Answer:</b>", table_header_style))
+        q_card.append(Paragraph(a_text, card_text_style))
+        q_card.append(Spacer(1, 6))
 
         if ev:
-            # Dimension score snippet
             score_summary = (
                 f"Technical: <b>{ev.get('technical_score')}%</b>  |  "
                 f"Completeness: <b>{ev.get('completeness_score')}%</b>  |  "
@@ -618,44 +621,28 @@ def generate_interview_pdf_report(db: Session, user: User, session_id: int) -> b
                 f"Similarity: <b>{ev.get('semantic_similarity_score')}%</b>  |  "
                 f"Concepts: <b>{ev.get('concept_coverage_score')}%</b>"
             )
-            q_body_rows.append([
-                Paragraph("<b>Sub-Scores:</b>", table_header_style),
-                Paragraph(score_summary, card_text_style)
-            ])
+            q_card.append(Paragraph("<b>Sub-Scores:</b>", table_header_style))
+            q_card.append(Paragraph(score_summary, card_text_style))
+            q_card.append(Spacer(1, 6))
 
             fb = safe_text(ev.get("feedback"))
             if fb:
-                q_body_rows.append([
-                    Paragraph("<b>Feedback:</b>", table_header_style),
-                    Paragraph(fb, card_text_style)
-                ])
+                q_card.append(Paragraph("<b>Feedback:</b>", table_header_style))
+                q_card.append(Paragraph(fb, card_text_style))
+                q_card.append(Spacer(1, 6))
 
-            # Concepts found vs expected if recorded
             concepts_exp = [safe_text(c) for c in (ev.get("concepts_expected") or []) if c]
             concepts_fnd = [safe_text(c) for c in (ev.get("concepts_found") or []) if c]
             if concepts_exp:
                 c_str = f"Expected: {', '.join(concepts_exp)} | Demonstrated: {', '.join(concepts_fnd) if concepts_fnd else 'None'}"
-                q_body_rows.append([
-                    Paragraph("<b>Key Concepts:</b>", table_header_style),
-                    Paragraph(c_str, card_text_style)
-                ])
+                q_card.append(Paragraph("<b>Key Concepts:</b>", table_header_style))
+                q_card.append(Paragraph(c_str, card_text_style))
+                q_card.append(Spacer(1, 6))
 
-        qb_table = Table(q_body_rows, colWidths=[110, 420])
-        qb_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), COLOR_SLATE_LIGHT),
-            ("BOX", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
-            ("INNERGRID", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-        ]))
-        q_card.append(qb_table)
-        q_card.append(Spacer(1, 8))
+        q_card.append(Spacer(1, 15))
 
-        # Keep individual question cards together when possible, allowing multi-page flow
-        story.append(KeepTogether(q_card))
+        for item in q_card:
+            story.append(item)
 
     # ─────────────────────────────────────────────────────────
     # 7. AGGREGATED STRENGTHS & AREAS FOR IMPROVEMENT

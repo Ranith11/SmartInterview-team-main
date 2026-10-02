@@ -102,7 +102,11 @@ class AdaptiveStartResponse(BaseModel):
 # ── Answer Request ────────────────────────────────────────
 
 class AnswerRequest(BaseModel):
-    answer_text: str = Field(default="", max_length=5000)
+    answer_text: Optional[str] = Field(default="")
+
+    model_config = {
+        "extra": "allow"
+    }
 
 
 # ── History ───────────────────────────────────────────────
