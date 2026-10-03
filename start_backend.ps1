@@ -1,4 +1,4 @@
-# start_backend.ps1 — Always run from project root, auto-loads .env
+# start_backend.ps1 - Always run from project root, auto-loads .env
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ProjectRoot
@@ -27,6 +27,11 @@ Write-Host "API docs: http://localhost:8000/docs" -ForegroundColor Gray
 Write-Host ""
 
 Set-Location "$ProjectRoot\backend"
-python -m uvicorn app.main:app --port 8000
+$PythonExe = Join-Path $ProjectRoot "venv\Scripts\python.exe"
+if (Test-Path $PythonExe) {
+    & $PythonExe -m uvicorn app.main:app --port 8000
+} else {
+    python -m uvicorn app.main:app --port 8000
+}
 
 

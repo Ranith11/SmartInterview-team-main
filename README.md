@@ -1,116 +1,132 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="SmartInterview Logo" width="120" />
-  <h1>SmartInterview</h1>
-  <p><strong>AI-Powered Adaptive Mock Interview Platform</strong></p>
+  <div style="width: 80px; height: 80px; background-color: #4f46e5; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+  </div>
+  
+  # SmartInterview
+
+  **An Adaptive, AI-Powered Technical Interview & Examination Preparation Platform**
+
+  [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+  [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white)](https://groq.com/)
+
 </div>
 
----
+<br />
 
-## 📖 Project Overview
+SmartInterview revolutionizes how students and professionals prepare for technical assessments. By bridging the gap between passive studying and active recall, the platform provides hyper-realistic, dynamic mock interviews tailored explicitly to your target role or curriculum. 
 
-SmartInterview is an advanced, full-stack application designed to simulate open-ended, technical mock interviews. Unlike rigid Q&A platforms, SmartInterview uses an adaptive learning engine based on **Bloom’s Taxonomy** to dynamically adjust the difficulty, depth, and cognitive level of questions based on real-time candidate performance.
-
-It leverages Retrieval-Augmented Generation (RAG) through a persistent ChromaDB vector knowledge base, powered by Groq's high-speed LLM inference, to generate highly contextual, technically accurate questions tailored to both the candidate's resume and the target job description.
-
-## ✨ Core Features
-
-*   **Resume & JD Skill Mapping**: Extracts and maps overlapping skills from uploaded Resumes and Job Descriptions (PDF) using PyMuPDF to drive targeted interview sessions.
-*   **Deterministic Adaptive Engine**: Modulates question difficulty and cognitive complexity across 6 levels of Bloom's Taxonomy based on a multi-signal scoring evaluation (not just LLM subjective scores).
-*   **Vector RAG Knowledge Base**: Uses ChromaDB and `all-MiniLM-L6-v2` embeddings to retrieve verified technical concepts, ensuring the LLM asks grounded questions.
-*   **Syllabus Mode**: A secondary mode that dynamically creates isolated, temporary vector collections from uploaded course material (PDF/DOCX/TXT) for academic study sessions.
-*   **Multi-Signal Answer Evaluation**: Evaluates candidate responses using 5 distinct metrics (Technical Accuracy, Completeness, Relevance, Semantic Similarity, and Concept Coverage).
-*   **Integrated Voice Synthesis (TTS & STT)**: High-quality offline-capable Microsoft Neural text-to-speech (`edge-tts`) and Groq Whisper audio transcription.
-*   **Performance Analytics & Reporting**: Real-time KPI dashboards tracking historical performance and automatic PDF report generation (`reportlab`).
+Whether you're uploading a job description to prep for a software engineering interview, or uploading a university syllabus to cram for finals, SmartInterview dynamically adjusts its questioning using state-of-the-art **Retrieval-Augmented Generation (RAG)** and **Adaptive State-Machine Routing**.
 
 ---
 
-## 🏗️ Architecture Stack
+## 🌟 Core Features
 
-### Frontend (User Interface)
-*   **Framework**: React 18 + Vite (Runs on port 5174)
-*   **Styling**: Tailwind CSS v4 + Lucide React (Icons)
-*   **Routing**: React Router DOM v7
-*   **State & Auth**: React Context API, JWT stored securely in standard SPA pattern.
+- **🎯 Adaptive Resume Mode (Targeted Prep):**
+  - Upload your Resume and a Target Job Description.
+  - The AI parses your skills, identifies gaps against the JD, and dynamically selects difficulty curves (from Entry Level to Staff Engineer).
+  - Uses state-machine routing to adjust subsequent questions based on your real-time performance.
 
-### Backend (API & Engine)
-*   **Framework**: FastAPI (Runs on port 8000)
-*   **Database**: MySQL (PyMySQL + SQLAlchemy 2.0 ORM)
-*   **Vector Database**: ChromaDB (Persistent local SQLite/Parquet)
-*   **LLM Provider**: Groq API (`openai/gpt-oss-120b` with fallback)
-*   **Embeddings**: SentenceTransformers (`all-MiniLM-L6-v2`)
-*   **Voice/Audio**: `edge-tts` (TTS), Groq Whisper (STT)
+- **📚 Course Syllabus Mode (RAG Architecture):**
+  - Upload entire study guides, syllabus PDFs, or textbook chapters.
+  - The backend chunks, embeds, and indexes the materials in **ChromaDB**.
+  - Creates a targeted exam covering exactly the subjects you requested—perfect for university prep.
+
+- **🎙️ Real-time Voice Interaction:**
+  - Built-in live speech recognition allows you to simply click a button and speak your answers.
+  - Text-to-Speech (TTS) engine voices the interviewer's questions back to you, simulating the pressure of a real technical round.
+
+- **📊 Deep Analytics & PDFs:**
+  - Complete post-interview debriefs with scoring on Technical Accuracy, Completeness, Semantic Similarity, and Relevance.
+  - Generates comprehensive PDF reports of your performance.
 
 ---
 
-## 🚀 Local Setup & Installation
+## 🏗️ Architecture
+
+SmartInterview relies on a modern, decoupled microservice architecture:
+
+- **Frontend:** React SPA built with Vite, styled elegantly using Tailwind CSS v4 and Framer Motion. 
+- **Backend:** High-performance, asynchronous REST API powered by FastAPI (Python 3.10+).
+- **AI/LLM Engine:** Groq (Llama 3 / Mixtral) handles adaptive questioning, feedback generation, and semantic evaluations with lightning-fast inference.
+- **Vector DB:** ChromaDB powers the RAG pipeline for Syllabus Mode.
+- **Storage:** SQLite handles user states, sessions, and historic evaluation data.
+
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
-*   Python 3.10+
-*   Node.js 18+
-*   MySQL Server 8.0+
-*   Git
+- Node.js (v20+)
+- Python (3.10+)
+- A [Groq API Key](https://console.groq.com/keys)
 
-### 1. Database Initialization
-Create the database and required tables using the canonical setup script:
+### 1. Clone & Environment Setup
 ```bash
-mysql -u root -p < backend/setup_database.sql
+git clone https://github.com/yourusername/Smart-Interview-main.git
+cd Smart-Interview-main
+
+# Set up the environment variables
+cp .env.example .env
+# Edit .env and insert your GROQ_API_KEY
 ```
-*(Ensure your MySQL credentials match the `.env` configuration).*
 
-### 2. Backend Setup
+### 2. Backend Initialization
 ```bash
-cd backend
+# Create and activate a virtual environment
 python -m venv venv
-# Activate venv:
-# Windows: venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-pip install -r requirements.txt
+# Install dependencies
+pip install -r backend/requirements.txt
+
+# Start the FastAPI server
+cd backend
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+*The API is now running at `http://localhost:8000` (Docs at `http://localhost:8000/docs`).*
 
-Create a `.env` file in the **project root** (same level as the `backend` and `frontend` folders) based on `.env.example`:
-```env
-GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=openai/gpt-oss-120b
-GROQ_FALLBACK_MODEL=openai/gpt-oss-20b
-DATABASE_URL=mysql+pymysql://root:root@localhost:3306/smartinterview
-JWT_SECRET_KEY=generate_a_secure_random_64_char_hex_string
-JWT_ALGORITHM=HS256
-JWT_EXPIRATION_MINUTES=1440
-```
-
-Start the backend server:
-```bash
-# Windows
-.\start_backend.ps1
-# Or manually:
-cd backend && python -m uvicorn app.main:app --port 8000 --reload
-```
-
-### 3. Frontend Setup
+### 3. Frontend Initialization
+Open a new terminal window.
 ```bash
 cd frontend
+
+# Install packages
 npm install
-```
 
-Start the frontend development server:
+# Start the Vite development server
+npm run dev
+```
+*The app is now running at `http://localhost:5174`.*
+
+---
+
+## 🧪 Running Tests
+The project features an automated End-to-End (E2E) testing suite using Playwright.
 ```bash
-# Windows
-.\start_frontend.ps1
-# Or manually:
-cd frontend && npm run dev
+# Install playwright browsers
+python -m playwright install
+
+# Run the test suite
+python tests/fixtures/test_e2e.py
 ```
 
-The application will be available at `http://localhost:5174`.
+---
+
+## 📖 Academic Deliverables
+All synchronized academic documentation and artifacts for this project are located in:
+- `SmartInterview_Deliverables/`: Finalized frozen artifacts.
+- `SmartInterview_Progressive_Updates/`: Live versioned documents (SRS, Research Paper, Master Encyclopedia).
+
+You can verify the codebase synchronization at any time by running:
+```bash
+python scripts/verify_deliverables_sync.py
+```
 
 ---
 
-## 🔒 Security Notes
-*   **API Keys**: Never commit your `GROQ_API_KEY` to version control. The `.env` file is excluded via `.gitignore`.
-*   **JWT Secret**: Ensure `JWT_SECRET_KEY` is a cryptographically secure random string in production environments.
-*   **Vector DB**: The `chroma_db/` directory contains pre-computed embeddings and is intentionally tracked in Git to provide a ready-to-use technical knowledge base.
-
----
-
-## 📝 License
-This is an academic project developed as a final software engineering capstone. All rights reserved by the original authors.
+<div align="center">
+  <i>Built with passion for the future of education and career preparation.</i>
+</div>
