@@ -52,6 +52,11 @@ from app.services.interview_service import (
 )
 from app.services.syllabus_rag_service import process_and_create_syllabus_rag
 from app.services.report_service import generate_interview_pdf_report
+from app.services.remediation_service import (
+    diagnose_session,
+    generate_remediation_notes,
+    start_remediation_session,
+)
 
 router = APIRouter(prefix="/api/interviews", tags=["interviews"])
 
@@ -616,3 +621,99 @@ def get_voice_status():
         "privacy": "Direct in-memory processing, zero permanent audio retention",
     }
 
+
+# ── Remediation Endpoints ─────────────────────────────────────────────────────
+
+@router.get("/{session_id}/remediation/diagnosis")
+def get_remediation_diagnosis(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Diagnose a completed session and classify skills into:
+    - weak_topics (< 65%): need immediate remediation
+    - borderline_topics (65-74%): need reinforcement
+    - strong_topics (>= 75%): mastered, will be skipped in retry
+    Used by the Results page to decide button label and badge counts.
+    """
+    try:
+        result = diagnose_session(db, current_user.id, session_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Diagnosis failed: {str(e)}")
+
+
+@router.get("/{session_id}/remediation/notes")
+def get_remediation_notes(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Generate AI-powered, mode-aware study notes for weak topics in a session.
+
+    Source strategy (no synthetic data, no conflicts):
+    - Resume + JD mode  → queries original 'technical_kb' (402 curated chunks, 8 domains)
+    - Syllabus mode     → queries 'syllabus_kb' (candidate's uploaded course material)
+
+    Notes are generated via Groq LLM enriched with relevant RAG context.
+    Includes: core concept, where marks were lost, key bullets, code examples, interview traps.
+    """
+    try:
+        result = generate_remediation_notes(db, current_user.id, session_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Notes generation failed: {str(e)}")
+
+
+@router.post("/{session_id}/remediation/start")
+def start_remedial_interview(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Create a new focused interview session targeting ONLY the weak/borderline
+    topics from the source session. Automatically clones resume/JD/syllabus context.
+
+    The new session is tagged with is_remediation=True and targeted_skills so
+    the Interview UI can show the '🎯 Focused Retest' badge.
+
+    Edge cases:
+    - All topics mastered → 400 error with message to try harder difficulty
+    - No evaluations → 400 error with clear message
+    - Syllabus mode → clones syllabus_id and selected_topics to weak list only
+    """
+    try:
+        result = start_remediation_session(db, current_user.id, session_id)
+        session = result["session"]
+        question = result["current_question"]
+        return {
+            "session_id": session.id,
+            "is_remediation": True,
+            "targeted_skills": result["targeted_skills"],
+            "source_session_id": result["source_session_id"],
+            "current_question": {
+                "id": question.id,
+                "question_number": question.question_number,
+                "skill": question.skill,
+                "question_text": question.question_text,
+                "difficulty": question.difficulty,
+                "question_type": question.question_type,
+                "bloom_level": question.bloom_level,
+            },
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to start remediation session: {str(e)}")

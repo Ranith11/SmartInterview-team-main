@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { BarChart3, Brain, Target, CheckCircle, ArrowLeft, Lightbulb, Loader2, AlertCircle, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { BarChart3, Brain, Target, CheckCircle, ArrowLeft, Lightbulb, Loader2, AlertCircle, ChevronDown, ChevronUp, Download, Sparkles, BookOpen, Trophy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api from '../services/api';
+import RemediationModal from '../components/RemediationModal';
 
 export default function Results() {
   const { id } = useParams();
@@ -13,6 +14,8 @@ export default function Results() {
   const [error, setError] = useState('');
   const [expandedQ, setExpandedQ] = useState(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [diagnosis, setDiagnosis] = useState(null);
+  const [showRemediation, setShowRemediation] = useState(false);
 
   useEffect(() => { loadResults(); }, [id]);
 
@@ -20,6 +23,12 @@ export default function Results() {
     try {
       const res = await api.get(`/interviews/${id}/results`);
       setResults(res.data);
+      try {
+        const diagRes = await api.get(`/interviews/${id}/remediation/diagnosis`);
+        setDiagnosis(diagRes.data);
+      } catch (dErr) {
+        console.debug('Remediation diagnosis unavailable:', dErr);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load results');
     } finally {
@@ -144,6 +153,37 @@ export default function Results() {
           <Link to="/setup" className="btn btn-primary shadow-sm">
             Start New Interview
           </Link>
+        </div>
+      )}
+
+      {/* Remedial Mastery Callout Card */}
+      {hasEvaluations && diagnosis && !diagnosis.all_mastered && diagnosis.weak_topics?.length > 0 && (
+        <div className="card p-6 bg-gradient-to-r from-rose-50/90 via-amber-50/70 to-indigo-50/90 border-rose-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5 mb-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <Target size={24} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100/80 px-2.5 py-0.5 rounded-full border border-rose-200">
+                  Adaptive Mastery Engine
+                </span>
+                <span className="text-xs font-bold text-slate-600">
+                  {diagnosis.weak_topics.length} Weak Area{diagnosis.weak_topics.length > 1 ? 's' : ''} (&lt;65%) Detected
+                </span>
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mt-1">Review Weak Areas &amp; Take Focused Retest</h3>
+              <p className="text-sm text-slate-600 mt-1 max-w-xl leading-relaxed">
+                Review tailored AI study notes powered by {session?.mode === 'syllabus' ? 'your uploaded syllabus' : 'the verified technical knowledge base'} and launch a focused session testing only what you missed.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowRemediation(true)}
+            className="btn bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white font-bold shadow-md px-6 py-3 flex items-center gap-2 flex-shrink-0 whitespace-nowrap cursor-pointer"
+          >
+            <Target size={16} /> Master Weak Areas ({diagnosis.weak_topics.length})
+          </button>
         </div>
       )}
 
@@ -385,8 +425,29 @@ export default function Results() {
       {/* Footer Actions */}
       <div className="flex flex-wrap items-center gap-3 justify-center pt-2 pb-12">
         <Link to="/dashboard" className="btn btn-secondary shadow-sm px-6">Dashboard</Link>
-        <Link to="/setup" className="btn btn-primary shadow-md px-6">New Interview</Link>
+        {diagnosis && !diagnosis.all_mastered && diagnosis.weak_topics?.length > 0 ? (
+          <>
+            <button
+              onClick={() => setShowRemediation(true)}
+              className="btn bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white font-bold shadow-md px-6 flex items-center gap-2 cursor-pointer"
+            >
+              <Target size={16} /> Master Weak Areas &amp; Retest ({diagnosis.weak_topics.length})
+            </button>
+            <Link to="/setup" className="btn btn-secondary shadow-sm px-6">New Full Interview</Link>
+          </>
+        ) : (
+          <Link to="/setup" className="btn btn-primary shadow-md px-6">New Interview</Link>
+        )}
       </div>
+
+      {/* Remediation Slide-Over Modal */}
+      {showRemediation && (
+        <RemediationModal
+          sessionId={parseInt(id, 10)}
+          mode={session?.mode || 'normal'}
+          onClose={() => setShowRemediation(false)}
+        />
+      )}
     </div>
   );
 }
