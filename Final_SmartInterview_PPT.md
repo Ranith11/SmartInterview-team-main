@@ -66,16 +66,17 @@
 
 ---
 
-## Slide 6: RAG-Grounded Question Generation
-**Eliminating LLM Hallucinations at the Root:**
-- **The Problem:** Zero-shot LLMs invent non-existent APIs, libraries, or flawed algorithmic complexities.
-- **Our Curated Knowledge Base:** 402 verified computer science chunks across 50 concepts in 8 core domains (`dsa`, `dbms`, `os`, `cn`, `system-design`, `oop`, `design-patterns`, `ml-dl`).
-- **Empirical Retrieval Benchmarks (33 Technical Domain Queries):**
-  * **Hit@1 = 96.97%** (Top retrieved chunk is the exact ground truth).
-  * **Hit@3 = 100.00%** (Correct technical answer key guaranteed in Top 3).
-  * **Mean Reciprocal Rank (MRR) = 0.9798** (Near-perfect ranking precision).
-  * **Retrieval Latency = 24.6 ms** (Well under 100ms threshold).
-- **Generation:** Prompt is strictly bounded by retrieved reference chunks, making hallucination mathematically negligible.
+## Slide 6: Hybrid Graph RAG Architecture
+**Eliminating LLM Hallucinations & Enabling Multi-Hop Reasoning:**
+- **The Problem:** Vanilla vector search misses exact technical keywords (`2PL`, `ACID`) and cannot traverse conceptual prerequisites.
+- **Tri-Retrieval Engine:**
+  * **Dense Vector Search (ChromaDB):** Semantic similarity matching via S-BERT embeddings.
+  * **Lexical Keyword Search (BM25Okapi):** Deterministic exact token matching for symbols, algorithms, and acronyms.
+  * **Knowledge Graph Traversal (NetworkX/Neo4j):** Directed graph mapping 50 CS concepts, prerequisite edges, and Bloom cognitive depths across 8 core domains (`data/graph_data.json`).
+- **Reciprocal Rank Fusion (RRF) & Cross-Encoder Reranker:**
+  * Merges rankings via $RRF(d) = \sum \frac{1}{k + r(d)}$ and cross-encoder scoring.
+  * **Hit@1 = 96.97%**, **Hit@3 = 100.00%**, **MRR = 0.9798** across 33 domain benchmarks.
+  * Embedded in-memory graph traversal $< 12\text{ms}$; total pipeline $< 650\text{ms}$.
 
 ---
 
@@ -102,33 +103,36 @@
 
 ---
 
-## Slide 9: Voice Interaction & Final Reporting
-**Creating an Authentic, Low-Latency Interview Environment:**
-- **Full Two-Way Voice:** Candidates speak naturally (transcribed via Whisper-large-v3 with domain prompt) and hear questions spoken aloud (Edge-TTS).
-- **Latency Benchmarks:**
-  * Voice synthesis latency <= 1.2 seconds (In-memory `io.BytesIO` streaming, zero disk footprint).
-  * Total end-to-end turn turnaround < 2.5 seconds (Groq LPU 320ms TTFT).
-- **Performance Analytics & Reporting:**
-  * Real-time React dashboard with 5-axis radar chart and Bloom level progression.
-  * Auto-generates downloadable ReportLab PDF report containing full transcripts, skill heatmaps, and personalized upskilling roadmaps.
+## Slide 9: Remedial Mastery Mode & Voice Synthesis
+**Transforming Assessment into Active Upskilling:**
+- **Remedial Mastery Mode:**
+  * **Knowledge Graph Root-Cause Tracing:** Automatically diagnoses missing prerequisite concepts when scores dip.
+  * **Dynamic Micro-Lessons & Flashcards:** Instantly generates interactive revision cards, conceptual summaries, and common pitfalls.
+  * **Targeted Retry Drills:** Enables candidates to immediately re-attempt failed concepts with adaptive scaffolding.
+- **Two-Way Voice Experience:**
+  * Neural Edge-TTS voice streaming with in-memory `io.BytesIO` buffers ($\le 1.2\text{s}$ latency).
+  * Groq Whisper transcription (`whisper-large-v3`) with CS domain vocabulary priming.
+  * Auto-generates downloadable ReportLab PDF performance roadmaps with 5-axis radar charts.
 
 ---
 
-## Slide 10: System Verification & Test Matrix
+## Slide 10: System Verification & 274-Test Matrix
 **Comprehensive Boundary & Integration Validation:**
-- Evaluated and verified across 7 formal test cases:
+- **274 Total Unit & Integration Tests across 18 Phases — 100% Passing:**
   * **TC-01 (Auth):** Duplicate registration rejected (HTTP 400) — *PASSED*
   * **TC-02 (Parsing):** Corrupt/invalid file upload rejected (HTTP 400) — *PASSED*
-  * **TC-03 (RAG Retrieval):** Domain-filtered Top-3 chunks returned in 24.6ms — *PASSED*
-  * **TC-04 (Adaptive Escalation):** Score >= 80% advances Bloom level (+1) — *PASSED*
-  * **TC-05 (Adaptive Remediation):** Score < 50% regresses Bloom level (-1) — *PASSED*
-  * **TC-06 (Neural Voice):** In-memory TTS byte stream generated in <= 1.2s — *PASSED*
+  * **TC-03 (Hybrid RAG):** Tri-retriever RRF scoring & canonical deduplication — *PASSED*
+  * **TC-04 (Graph Store):** Automatic NetworkX in-memory fallback when Neo4j is absent — *PASSED*
+  * **TC-05 (Bloom Scaling):** Dynamic tier advancement ($\ge 80\%$) and regression ($< 50\%$) — *PASSED*
+  * **TC-06 (Remediation):** Prerequisite root-cause diagnosis and retry question dispatch — *PASSED*
   * **TC-07 (Rubric Determinism):** 5-factor mathematical formula convergence — *PASSED*
+  * **TC-08 (Failure Safeguards):** Candidate starvation prevention and corrupt query handling — *PASSED*
 
 ---
 
 ## Slide 11: Conclusion & Questions
 **Conclusion:**
-SmartInterview bridges the gap between theoretical higher education and dynamic industry hiring. By combining 402-chunk RAG grounding (96.97% Hit@1), deterministic Bloom's taxonomy cognitive scaffolding, and multi-signal objective evaluation, we deliver an authentic, unbiased, low-latency interview preparation ecosystem.
+SmartInterview bridges the gap between theoretical higher education and dynamic industry hiring. By combining Hybrid Graph RAG grounding (Hit@1: 96.97%, Hit@3: 100%), deterministic Bloom's taxonomy cognitive scaffolding, Remedial Mastery drills, and multi-signal objective evaluation, we deliver an authentic, unbiased, low-latency interview preparation ecosystem.
 
 **Thank You! We are now open for questions from the panel.**
+

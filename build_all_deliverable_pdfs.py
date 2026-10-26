@@ -15,6 +15,16 @@ from reportlab.pdfgen import canvas
 
 REPO_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+def format_inline_md(text):
+    if not text:
+        return ""
+    text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'`(.*?)`', r'<font face="Courier"><b>\1</b></font>', text)
+    text = re.sub(r'(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
+    return text
+
+
 class NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -188,16 +198,25 @@ def build_presentation_pdf():
         story.append(Paragraph(title, slide_title_style))
         story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#3182CE'), spaceAfter=14))
         
+        def format_inline_md(text):
+            if not text:
+                return ""
+            text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+            text = re.sub(r'`(.*?)`', r'<font face="Courier"><b>\1</b></font>', text)
+            text = re.sub(r'(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
+            return text
+
         for line in content_lines:
             if line.startswith('**') and line.endswith('**'):
                 story.append(Paragraph(line.replace('**', ''), slide_section_header))
             elif line.startswith('- ') or line.startswith('• '):
-                story.append(Paragraph("• " + line[2:].replace('**', '<b>').replace('**', '</b>'), slide_bullet_style))
+                story.append(Paragraph("• " + format_inline_md(line[2:]), slide_bullet_style))
             elif line.startswith('  * ') or line.startswith('   - ') or line.startswith('  - '):
                 clean = re.sub(r'^\s*[-*]\s*', '', line)
-                story.append(Paragraph("— " + clean.replace('**', '<b>').replace('**', '</b>'), slide_subbullet_style))
+                story.append(Paragraph("— " + format_inline_md(clean), slide_subbullet_style))
             else:
-                story.append(Paragraph(line.replace('**', '<b>').replace('**', '</b>'), slide_body_style))
+                story.append(Paragraph(format_inline_md(line), slide_body_style))
                 
         if idx < len(slides) - 1:
             story.append(PageBreak())
@@ -358,7 +377,7 @@ def build_srs_pdf():
                 elif line.startswith('### '):
                     story.append(Paragraph(line[4:].replace('**', ''), h2_style))
                 elif line.startswith('- ') or line.startswith('* '):
-                    story.append(Paragraph("• " + line[2:].replace('**', '<b>').replace('**', '</b>'), bullet_style))
+                    story.append(Paragraph("• " + format_inline_md(line[2:]), bullet_style))
                 elif line.startswith('|') and '|' in line[1:]:
                     # Table row representation
                     cols = [c.strip() for c in line.split('|')[1:-1]]
@@ -366,7 +385,7 @@ def build_srs_pdf():
                         row_text = " | ".join(cols)
                         story.append(Paragraph(f"<code>{row_text}</code>", body_style))
                 else:
-                    story.append(Paragraph(line.replace('**', '<b>').replace('**', '</b>'), body_style))
+                    story.append(Paragraph(format_inline_md(line), body_style))
 
     doc.build(story, canvasmaker=NumberedCanvas)
     print(f"[OK] Generated {pdf_path}")
@@ -504,12 +523,12 @@ def build_research_paper_pdf():
             
         if s.startswith('**Index Terms'):
             in_abstract = False
-            story.append(Paragraph(s.replace('**', '<b>').replace('**', '</b>'), abstract_body))
+            story.append(Paragraph(format_inline_md(s), abstract_body))
             story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#CBD5E1'), spaceAfter=8))
             continue
             
         if in_abstract:
-            story.append(Paragraph(s.replace('**', '<b>').replace('**', '</b>'), abstract_body))
+            story.append(Paragraph(format_inline_md(s), abstract_body))
             continue
 
         # Normal sections
@@ -518,13 +537,13 @@ def build_research_paper_pdf():
         elif s.startswith('### '):
             story.append(Paragraph(s[4:].replace('**', ''), subsec_heading))
         elif s.startswith('- ') or s.startswith('* '):
-            story.append(Paragraph("• " + s[2:].replace('**', '<b>').replace('**', '</b>'), paper_bullet))
+            story.append(Paragraph("• " + format_inline_md(s[2:]), paper_bullet))
         elif s.startswith('|') and '|' in s[1:]:
             cols = [c.strip() for c in s.split('|')[1:-1]]
             if cols and not all(c.startswith('---') for c in cols):
                 story.append(Paragraph(f"<code>{' | '.join(cols)}</code>", paper_body))
         else:
-            story.append(Paragraph(s.replace('**', '<b>').replace('**', '</b>'), paper_body))
+            story.append(Paragraph(format_inline_md(s), paper_body))
 
     doc.build(story, canvasmaker=NumberedCanvas)
     print(f"[OK] Generated {pdf_path}")
