@@ -133,6 +133,10 @@ The Software Development Life Cycle (SDLC) followed for SmartInterview is the Ag
 
 ## 4. System Designing & UML Diagrams
 
+![Figure 4.0: Decoupled 4-Tier Distributed System Architecture](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Architecture.png)
+*Figure 4.0: Decoupled 4-Tier Distributed System Architecture of SmartInterview.*
+
+
 ### 4.1 Use Case Diagram
 ```mermaid
 graph LR
@@ -149,6 +153,10 @@ graph LR
 ```
 
 ### 4.2 Sequence Diagram: Interview Session & Evaluation
+
+![Figure 4.2B: End-to-End Interview Execution & Remediation Workflow](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Workflow.png)
+*Figure 4.2B: End-to-End Interview Execution, Context Staging, and Remedial Mastery Workflow.*
+
 ```mermaid
 sequenceDiagram
     participant C as Candidate
@@ -248,6 +256,10 @@ stateDiagram-v2
 ```
 
 ### 4.6 Entity Relationship Diagram (ERD)
+
+![Figure 4.6B: Normalized Relational Entity-Relationship Diagram (ERD)](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/ERD.png)
+*Figure 4.6B: Normalized Relational Entity-Relationship Diagram (ERD) with JSON state persistence.*
+
 ```mermaid
 erDiagram
     USERS ||--o{ RESUMES : uploads
@@ -296,6 +308,22 @@ graph TD
     API -->|HTTPS| EdgeTTS
 ```
 
+### 4.8 User Interface Architecture & Real-Time Operational Screen Captures
+
+SmartInterview provides a responsive, high-contrast, accessibility-compliant user interface built with React 18, Vite, and Tailwind CSS. The following figures illustrate the primary operational screens verified during system testing:
+
+![Figure 4.8.1: Candidate Overview & Practice Dashboard](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/04_dashboard.png)
+*Figure 4.8.1: Candidate Overview & Practice Dashboard displaying total interviews, completion rate, average score, and recent interview history cards.*
+
+![Figure 4.8.2: Live Spoken Interview Room](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/13_live_interview_session.png)
+*Figure 4.8.2: Live Spoken Interview Room with active Bloom taxonomy badge (Level 4: Analyze), neural TTS audio playback controls, real-time STT microphone capture, and technical question prompt.*
+
+![Figure 4.8.3: Comprehensive Evaluation Results Scorecard](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/11_results_scorecard.png)
+*Figure 4.8.3: Comprehensive Candidate Evaluation Results Scorecard displaying 5-axis radar competency chart, Bloom progression, question transcripts, and PDF export.*
+
+![Figure 4.8.4: Remedial Mastery Mode & Targeted Upskilling](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/12_remedial_mastery_mode.png)
+*Figure 4.8.4: Remedial Mastery Mode displaying Knowledge Graph prerequisite diagnostics, high-yield study guides, common candidate failure patterns, and 1-click focused retesting.*
+
 ---
 
 ## 5. Implementation
@@ -310,7 +338,7 @@ graph TD
 
 ## 6. Testing (Validation & Verification)
 **Software Validation:** Ensures the platform satisfies user needs. Tests confirmed that candidates can seamlessly upload a resume and JD, triggering an interview accurately mapped to their role overlapping and gap areas, and proceed to remedial practice upon session completion.
-**Software Verification:** Confirms adherence to design. Evaluated API schemas, foreign key constraints in MySQL, mathematical verification of the 5-factor weighting formula, and 274 unit/integration tests across 18 phases for the Hybrid Graph RAG pipeline.
+**Software Verification:** Confirms adherence to design. Evaluated API schemas, foreign key constraints in MySQL, mathematical verification of the 5-factor weighting formula, and 355 unit, integration, and security tests across 18 phases (100% pass rate in 87.90s) for the Hybrid Graph RAG pipeline.
 
 | Test ID | Module | Scenario | Expected Result | Status |
 |---|---|---|---|---|
@@ -323,7 +351,7 @@ graph TD
 | TC-07 | Remediation | Session score < 70% | Generates root-cause prerequisite diagnosis | PASSED |
 | TC-08 | Voice | Synthesize TTS stream | Audio byte stream OK (latency <= 1.2s) | PASSED |
 | TC-09 | Evaluation | 5-Factor Scoring Formula | Deterministic mathematical score convergence | PASSED |
-| TC-10 | Benchmark | 274 Suite RAG Phase Tests | 274/274 unit and integration tests passing | PASSED |
+| TC-10 | Benchmark | 355 Suite RAG & Adaptive Phase Tests | 355/355 unit and integration tests passing (100%) | PASSED |
 
 ---
 

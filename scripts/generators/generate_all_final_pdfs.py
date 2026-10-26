@@ -294,9 +294,31 @@ def generate_srs_pdf():
                     story.append(Paragraph(md_to_reportlab(s[2:]), h1))
                 elif s.startswith('## '):
                     story.append(Paragraph(md_to_reportlab(s[3:]), h1))
-                elif s.startswith('### '):
-                    story.append(Paragraph(md_to_reportlab(s[4:]), h2))
-                elif s.startswith('- ') or s.startswith('* '):
+                if s.startswith('!['):
+                    m = re.match(r'!\[(.*?)\]\((.*?)\)', s)
+                    if m:
+                        img_p = m.group(2).strip()
+                        if img_p.startswith('file:///'):
+                            img_p = img_p[8:]
+                        img_p = os.path.normpath(img_p)
+                        if os.path.exists(img_p):
+                            try:
+                                pimg = Image.open(img_p)
+                                w, h = pimg.size
+                                asp = h / float(w)
+                                tw = 460
+                                th = tw * asp
+                                if th > 260:
+                                    th = 260
+                                    tw = th / asp
+                                story.append(Spacer(1, 4))
+                                story.append(RLImage(img_p, width=tw, height=th))
+                                story.append(Paragraph(f"<b>{m.group(1)}</b>", caption))
+                                story.append(Spacer(1, 4))
+                            except Exception as e:
+                                pass
+                    continue
+                if s.startswith('- ') or s.startswith('* '):
                     story.append(Paragraph("• " + md_to_reportlab(s[2:]), bullet))
                 elif s.startswith('|') and '|' in s[1:]:
                     cols = [c.strip() for c in s.split('|')[1:-1]]
@@ -307,6 +329,7 @@ def generate_srs_pdf():
 
     doc.build(story, canvasmaker=NumberedCanvas)
     print(f"[SUCCESS] Saved SRS PDF: {pdf_path}")
+
 
 
 # ==============================================================================
@@ -346,9 +369,11 @@ def generate_research_paper_pdf():
     ))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#94A3B8'), spaceAfter=8))
 
-    rp_file = os.path.join(REPO_ROOT, "SmartInterview_Progressive_Updates", "03_Research_Paper", "SmartInterview_Research_Paper_IEEE_v2.md")
+    rp_file = os.path.join(REPO_ROOT, "SmartInterview_Deliverables", "03_Research_Paper", "SmartInterview_Research_Paper_IEEE.md")
     with open(rp_file, 'r', encoding='utf-8') as f:
         rp_lines = f.readlines()
+
+    caption = ParagraphStyle('CapR', fontName='Times-Italic', fontSize=8, leading=10.5, textColor=colors.HexColor('#475569'), alignment=TA_CENTER, spaceBefore=3, spaceAfter=6)
 
     in_abstract = False
     for line in rp_lines:
@@ -373,10 +398,37 @@ def generate_research_paper_pdf():
             story.append(Paragraph(md_to_reportlab(s), abstract_body))
             continue
 
+        if s.startswith('!['):
+            m = re.match(r'!\[(.*?)\]\((.*?)\)', s)
+            if m:
+                img_p = m.group(2).strip()
+                if img_p.startswith('file:///'):
+                    img_p = img_p[8:]
+                img_p = os.path.normpath(img_p)
+                if os.path.exists(img_p):
+                    try:
+                        pimg = Image.open(img_p)
+                        w, h = pimg.size
+                        asp = h / float(w)
+                        tw = 460
+                        th = tw * asp
+                        if th > 260:
+                            th = 260
+                            tw = th / asp
+                        story.append(Spacer(1, 4))
+                        story.append(RLImage(img_p, width=tw, height=th))
+                        story.append(Paragraph(f"<b>{m.group(1)}</b>", caption))
+                        story.append(Spacer(1, 4))
+                    except Exception as e:
+                        pass
+            continue
+
         if s.startswith('## '):
             story.append(Paragraph(md_to_reportlab(s[3:]), h1))
         elif s.startswith('### '):
             story.append(Paragraph(md_to_reportlab(s[4:]), h2))
+        elif s.startswith('*Fig'):
+            story.append(Paragraph(md_to_reportlab(s), caption))
         elif s.startswith('- ') or s.startswith('* '):
             story.append(Paragraph("• " + md_to_reportlab(s[2:]), bullet))
         elif s.startswith('|') and '|' in s[1:]:
@@ -388,6 +440,7 @@ def generate_research_paper_pdf():
 
     doc.build(story, canvasmaker=NumberedCanvas)
     print(f"[SUCCESS] Saved Research Paper PDF: {pdf_path}")
+
 
 
 # ==============================================================================
@@ -549,9 +602,21 @@ def generate_explanation_pdf():
 
 
 if __name__ == "__main__":
+    import shutil
     print("Executing master generation for all 4 deliverable PDFs...")
     generate_presentation_pdf()
     generate_srs_pdf()
     generate_research_paper_pdf()
     generate_explanation_pdf()
+
+    # Synchronize to SmartInterview_Deliverables/ folders
+    deliv_srs = os.path.join(REPO_ROOT, "SmartInterview_Deliverables", "02_SRS_Specification", "SmartInterview_SRS_Template_Format.pdf")
+    deliv_paper = os.path.join(REPO_ROOT, "SmartInterview_Deliverables", "03_Research_Paper", "SmartInterview_Research_Paper.pdf")
+    deliv_ppt = os.path.join(REPO_ROOT, "SmartInterview_Deliverables", "04_Presentation_and_Defense", "SmartInterview_Project_Presentation.pdf")
+    
+    shutil.copyfile(os.path.join(OUT_DIR, "SmartInterview_SRS_Final.pdf"), deliv_srs)
+    shutil.copyfile(os.path.join(OUT_DIR, "SmartInterview_Research_Paper_Final.pdf"), deliv_paper)
+    shutil.copyfile(os.path.join(OUT_DIR, "SmartInterview_Presentation_Final.pdf"), deliv_ppt)
+    print("[SUCCESS] Synchronized all final PDFs into SmartInterview_Deliverables/")
     print("ALL 4 DELIVERABLE PDFS BUILT SUCCESSFULLY!")
+

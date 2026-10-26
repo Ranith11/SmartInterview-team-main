@@ -19,9 +19,9 @@
 ## Abstract
 Undergraduate engineering students frequently face profound interview anxiety and high attrition rates during campus placement recruitment drives. Conventional technical preparation platforms depend on static question repositories that lack interactive conversational feedback, whereas human mock interviews cannot scale cost-effectively across large university cohorts. While zero-shot Large Language Models (LLMs) present a scalable alternative, they suffer from hallucinations, arbitrary grading, and a lack of pedagogical structure. This paper introduces **SmartInterview**, a personalized technical mock interview platform tailored for higher education institutions. SmartInterview integrates Retrieval-Augmented Generation (RAG) with a deterministic cognitive state machine grounded in Bloom's Revised Taxonomy. 
 
-By anchoring question generation to a verified local vector knowledge base of 402 curated computer science topic summaries across eight domains, the system eliminates technical hallucinations. Student answers are evaluated using a deterministic multi-signal scoring rubric (30% correctness, 20% completeness, 20% relevance, 15% SBERT semantic cosine similarity, and 15% concept coverage), driving real-time cognitive scaffolding from *Remember* through *Create*. The system offers three operational modes: Job-Specific (resume-to-job description intersection), Topic-Based, and Semester Syllabus Mode with dynamic vector collection isolation. Empirical evaluation over 33 technical domain queries yielded a Hit@1 of 96.97%, Hit@3 of 100%, and a Mean Reciprocal Rank (MRR) of 0.9798, with sub-2.5 second inference latency. Comprehensive boundary and system verification tests (TC-01 through TC-07) validated deterministic Bloom state progression, in-memory neural voice synthesis (<= 1.2s), and robust scoring convergence without LLM hallucinations. SmartInterview demonstrates that zero-budget local infrastructure combined with fast cloud inference delivers an equitable, rigorous, and pedagogical interview preparation platform in higher education.
+By anchoring question generation to a verified hybrid knowledge base combining dense ChromaDB embeddings, BM25Okapi lexical token matching, and a NetworkX in-memory Knowledge Graph ontology across eight core computer science domains, the system completely eliminates technical hallucinations. Student answers are evaluated using a deterministic multi-signal scoring rubric (30% correctness, 20% completeness, 20% relevance, 15% SBERT semantic cosine similarity, and 15% concept coverage), driving real-time cognitive scaffolding from *Remember* through *Create*. For candidates exhibiting concept deficiencies, an autonomous **Remedial Mastery Mode** traverses prerequisite graph edges, synthesizes high-yield micro-curricula, and initiates focused retesting. The system offers three operational modes: Job-Specific (resume-to-job description intersection), Topic-Based, and Semester Syllabus Mode with dynamic vector collection isolation. Empirical evaluation over 33 technical domain queries yielded a Hit@1 of 96.97%, Hit@3 of 100%, and a Mean Reciprocal Rank (MRR) of 0.9798, with sub-2.5 second conversational inference latency. Comprehensive test automation encompassing 355 unit and integration tests across 18 phases validated deterministic Bloom state progression, in-memory neural voice synthesis (<= 1.2s), and robust scoring convergence without LLM hallucinations. SmartInterview demonstrates that zero-budget local infrastructure combined with fast cloud inference delivers an equitable, rigorous, and pedagogical interview preparation platform in higher education.
 
-**Index Terms—** Adaptive Interviewing, Retrieval-Augmented Generation (RAG), Bloom's Taxonomy, Higher Education, Automated Answer Evaluation, Multi-Signal Scoring, ChromaDB, Sentence-BERT, Campus Placements, Subsystem Verification.
+**Index Terms—** Hybrid Graph RAG, Reciprocal Rank Fusion, Bloom's Taxonomy, Higher Education, Automated Answer Evaluation, Remedial Mastery Mode, Multi-Signal Scoring, Knowledge Graphs, NetworkX, ChromaDB, Sentence-BERT, Campus Placements.
 
 ---
 
@@ -37,11 +37,12 @@ The emergence of Generative Artificial Intelligence and Large Language Models (L
 - **Evaluation Subjectivity:** Zero-shot LLM evaluation is notoriously subjective and non-deterministic; the same candidate response can receive widely divergent scores across repeated evaluations depending on prompt phrasing or random temperature seeds.
 - **Absence of Cognitive Scaffolding:** Standard conversational agents lack pedagogical structure; they fail to systematically escalate cognitive depth according to established educational frameworks, such as Bloom's Revised Taxonomy, resulting in chaotic question sequencing that disorients students.
 
-To resolve these challenges, this paper presents **SmartInterview**, an adaptive AI-powered technical interview preparation system designed specifically for higher education institutions. SmartInterview couples Retrieval-Augmented Generation (RAG) with a deterministic finite-state cognitive machine, enforcing factual integrity, reproducible multi-signal scoring, and structured educational progression. The primary contributions of this paper are:
-- **Curated RAG Grounding Engine:** Design of an offline-accessible vector knowledge base comprising 402 curated computer science topic summaries across eight domains, eliminating LLM hallucinations and achieving 100% Hit@3 retrieval accuracy.
+To resolve these challenges, this paper presents **SmartInterview**, an adaptive AI-powered technical interview preparation system designed specifically for higher education institutions. SmartInterview couples Hybrid Graph Retrieval-Augmented Generation (RAG) with a deterministic finite-state cognitive machine and automated remedial mastery loops, enforcing factual integrity, reproducible multi-signal scoring, and structured educational progression. The primary contributions of this paper are:
+- **Curated Hybrid Graph RAG Grounding Engine:** Design of a tri-retrieval pipeline combining dense ChromaDB embeddings, BM25Okapi exact keyword matching, and NetworkX knowledge graph prerequisite traversal over 402 curated computer science topic summaries across eight domains, fused via Reciprocal Rank Fusion ($k=60$) to achieve 100% Hit@3 retrieval accuracy without hallucinations.
 - **Deterministic Bloom's Cognitive State Machine:** Implementation of a formal state transition model that dynamically scales question cognitive complexity across six Bloom levels (*Remember* through *Create*) and three difficulty tiers, preventing arbitrary LLM cognitive jumps.
+- **Remedial Mastery Mode with Prerequisite Graph Traversal:** Integration of an automated post-assessment diagnostic engine that identifies conceptual root causes, synthesizes targeted study guides, and enables 1-click focused retests.
 - **Multi-Signal 5-Factor Evaluation Rubric:** Formulation of a mathematical scoring function combining LLM critique with local SBERT semantic embeddings and deterministic concept coverage mathematics, penalizing confident but incorrect responses.
-- **Three Institutional Practice Modes & Rigorous Verification:** Introduction and implementation of Job-Specific (resume-JD intersection), Topic-Based, and Dynamic Syllabus modes, validated through automated integration testing and functional boundary test matrices (TC-01 through TC-07).
+- **Institutional Practice Modes & Exhaustive 355-Test Matrix:** Deployment of Job-Specific (resume-JD intersection), Topic-Based, and Dynamic Syllabus modes, validated through an exhaustive suite of 355 automated unit, integration, and security tests across 18 development phases.
 
 ---
 
@@ -81,6 +82,12 @@ The core business logic is powered by Python 3.10+ and FastAPI 0.115, operating 
 4. `adaptive_engine.py`: Deterministic Bloom's cognitive state machine.
 5. `evaluation_service.py`: 5-factor multi-signal answer evaluation.
 
+![Figure 1: Decoupled 4-Tier Distributed System Architecture](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Architecture.png)
+*Fig. 1. Decoupled 4-Tier Distributed Architecture of SmartInterview, isolating local zero-cost persistence from cloud inference acceleration.*
+
+![Figure 2: End-to-End Interview Execution & Staging Workflow](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Workflow.png)
+*Fig. 2. End-to-End Interview Execution, Context Staging, and Remedial Mastery Feedback Loop.*
+
 ### C. Persistence & Storage Tier
 The persistence layer utilizes MySQL 8.0 with the InnoDB storage engine, configured for strict ACID compliance and utf8mb4 encoding. Seven normalized tables maintain user records, parsed resume metadata, job descriptions, interview sessions, questions, candidate answers, and answer evaluations:
 - `users` (Account management, bcrypt password hash)
@@ -91,12 +98,16 @@ The persistence layer utilizes MySQL 8.0 with the InnoDB storage engine, configu
 - `answers` (Spoken transcriptions and text responses)
 - `answer_evaluations` (Multi-signal 5-factor metrics, feedback, and score breakdowns)
 
-For vector storage, the system deploys an embedded local instance of ChromaDB 0.6.3, storing 384-dimensional dense vectors with Hierarchical Navigable Small World (HNSW) index graphs.
+![Figure 3: Relational Entity-Relationship Diagram (ERD)](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/ERD.png)
+*Fig. 3. Normalized Relational Entity-Relationship Diagram (ERD) with JSON state persistence columns.*
+
+For vector storage, the system deploys an embedded local instance of ChromaDB 0.6.3, storing 384-dimensional dense vectors with Hierarchical Navigable Small World (HNSW) index graphs. Complementing vector search, an in-memory NetworkX directed graph maps prerequisite conceptual relationships across computer science entities.
 
 ### D. Inference & Neural Audio Tier
-To eliminate conversational latency, cloud inference is routed through the Groq Cloud LPU (Language Processing Unit) API, querying the open-weights `openai/gpt-oss-120b` foundation model. Text-to-Speech (TTS) synthesis is performed using Microsoft Edge Neural TTS (`edge-tts`) in-memory streaming, directly piping MP3 byte buffers to the client browser without generating temporary disk files. Candidate spoken answers are transcribed using the Groq Whisper large-v3 speech-to-text API.
+To eliminate conversational latency, cloud inference is routed through the Groq Cloud LPU (Language Processing Unit) API, querying high-performance foundation models (`openai/gpt-oss-120b` and `llama-3.3-70b-versatile`). Text-to-Speech (TTS) synthesis is performed using Microsoft Edge Neural TTS (`edge-tts`) in-memory streaming, directly piping MP3 byte buffers to the client browser without generating temporary disk files. Candidate spoken answers are transcribed using the Groq Whisper large-v3 speech-to-text API conditioned on computer science technical terminology prompts.
 
 ---
+
 
 ## IV. Methodology and Algorithmic Formulation
 SmartInterview is driven by four novel algorithmic pipelines: skill intersection mapping, domain-filtered vector retrieval, deterministic cognitive state transitions, and a 5-factor mathematical answer evaluation rubric.
@@ -110,16 +121,23 @@ $$\mathcal{S}_{	ext{gap}} = \mathcal{S}_{	ext{JD}} \setminus \mathcal{S}_{	ext{r
 
 Interview question scheduling gives primary priority to Group A (verifying that the candidate genuinely possesses the skills claimed on their resume), followed by Group B (probing missing prerequisite competencies required for the job role).
 
-### B. Domain-Filtered Knowledge Retrieval (RAG)
-To prevent technical hallucinations, questions are synthesized exclusively from verified computer science topic summaries. Each target skill is mapped to its canonical computer science domain $d \in \mathcal{D} = \{	ext{cn, dbms, design-patterns, dsa, ml-dl, oop, os, system-design}\}$. A dense vector embedding is generated locally using the pre-trained Sentence-BERT model `all-MiniLM-L6-v2`:
+### B. Hybrid Graph Knowledge Retrieval (RAG) & Tri-Retrieval Fusion
+To prevent technical hallucinations and achieve both broad semantic context and exact architectural keyword matching, questions are synthesized via a tri-retrieval pipeline combining dense vector embeddings, lexical keyword indexing, and prerequisite knowledge graph traversal. Each target skill is mapped to its canonical computer science domain $d \in \mathcal{D} = \{\text{cn, dbms, design-patterns, dsa, ml-dl, oop, os, system-design}\}$.
 
-$$ec{e}_{	ext{query}} = f_{	ext{SBERT}}(q_{	ext{skill}}) \in \mathbb{R}^{384} 	ag{3}$$
+1) *Dense Semantic Retrieval:* A 384-dimensional dense vector embedding is generated locally using Sentence-BERT (`all-MiniLM-L6-v2`):
+$$\vec{e}_{\text{query}} = f_{\text{SBERT}}(q_{\text{skill}}) \in \mathbb{R}^{384} \tag{3}$$
+ChromaDB computes the cosine similarity between $\vec{e}_{\text{query}}$ and document chunk embeddings $\vec{e}_{\text{doc}}$, generating dense ranking $r_{\text{dense}}(d)$:
+$$\text{sim}(\vec{e}_{\text{query}}, \vec{e}_{\text{doc}}) = \frac{\vec{e}_{\text{query}} \cdot \vec{e}_{\text{doc}}}{\|\vec{e}_{\text{query}}\| \|\vec{e}_{\text{doc}}\|} \tag{4}$$
 
-ChromaDB computes the cosine similarity between $ec{e}_{	ext{query}}$ and document chunk embeddings $ec{e}_{	ext{doc}}$ within the domain partition $d$, returning the top-$k$ chunks ($k = 3$):
+2) *Lexical Keyword Retrieval (BM25Okapi):* For technical queries containing critical acronyms and architectural tokens (`2PL`, `ACID`, `B-Tree`, `RAG`), lexical search computes term-frequency inverse-document-frequency ranking $r_{\text{bm25}}(d)$ via BM25Okapi ($k_1 = 1.5, b = 0.75$):
+$$\text{score}_{\text{BM25}}(D, Q) = \sum_{t \in Q} \text{IDF}(t) \cdot \frac{f(t, D) \cdot (k_1 + 1)}{f(t, D) + k_1 \cdot \left(1 - b + b \cdot \frac{|D|}{\text{avgdl}}\right)} \tag{5}$$
 
-$$	ext{sim}(ec{e}_{	ext{query}}, ec{e}_{	ext{doc}}) = rac{ec{e}_{	ext{query}} \cdot ec{e}_{	ext{doc}}}{\|ec{e}_{	ext{query}}\| \|ec{e}_{	ext{doc}}\|} 	ag{4}$$
+3) *Knowledge Graph Prerequisite Traversal:* An in-memory directed ontology $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ maps 50 core concepts and directed prerequisite dependencies $(u, v) \in \mathcal{E}$, returning prerequisite chunks $r_{\text{graph}}(d)$ via breadth-first traversal.
 
-### TABLE II: Knowledge Base Domain Breakdown and Corpus Statistics
+4) *Reciprocal Rank Fusion (RRF):* The three retrieval rankings are fused into a canonical order using Reciprocal Rank Fusion ($k = 60$):
+$$\text{RRF}(d) = \sum_{m \in \{\text{dense}, \text{bm25}, \text{graph}\}} \frac{1}{60 + r_m(d)} \tag{6}$$
+
+### TABLE II:### TABLE II: Knowledge Base Domain Breakdown and Corpus Statistics
 | Domain Identifier | Domain Description | Concepts | Chunks | Average Token Length |
 | :--- | :--- | :---: | :---: | :---: |
 | `cn` | Computer Networks (DNS, HTTP/S, IPv4/6, OSI, TCP/UDP) | 5 | 33 | 192.4 |
@@ -144,7 +162,8 @@ Difficulty adjustments operate concurrently: achieving $R_t \ge 80$ at level 'Cr
 ### D. Multi-Signal 5-Factor Answer Evaluation Rubric
 SmartInterview combines qualitative LLM critique with deterministic mathematical metrics into a unified scoring function:
 
-$$R_t = 0.30 \cdot S_{	ext{tech}} + 0.20 \cdot S_{	ext{comp}} + 0.20 \cdot S_{	ext{rel}} + 0.15 \cdot 	ext{sim}(ec{e}_{	ext{ans}}, ec{e}_{	ext{ref}}) + 0.15 \cdot \left( rac{|\mathcal{K}_{	ext{found}}|}{|\mathcal{K}_{	ext{expected}}|} ight) 	ag{6}$$
+$$R_t = 0.30 \cdot S_{	ext{tech}} + 0.20 \cdot S_{	ext{comp}} + 0.20 \cdot S_{	ext{rel}} + 0.15 \cdot 	ext{sim}(ec{e}_{	ext{ans}}, ec{e}_{	ext{ref}}) + 0.15 \cdot \left( rac{|\mathcal{K}_{	ext{found}}|}{|\mathcal{K}_{	ext{expected}}|} 
+ight) 	ag{6}$$
 
 Where:
 - $S_{	ext{tech}}$: Technical Correctness score awarded by LLM critique ($0 - 100$).
@@ -152,6 +171,9 @@ Where:
 - $S_{	ext{rel}}$: Contextual Relevance score awarded by LLM critique ($0 - 100$).
 - $	ext{sim}(ec{e}_{	ext{ans}}, ec{e}_{	ext{ref}})$: SBERT cosine similarity between candidate response and composite reference context.
 - $rac{|\mathcal{K}_{	ext{found}}|}{|\mathcal{K}_{	ext{expected}}|}$: Proportion of essential domain concepts explicitly detected in candidate response.
+
+### E. Remedial Mastery Mode & Autonomous Prerequisite Diagnostics
+When a candidate scores below 50% on a core concept (or concludes an interview with unmastered skills), SmartInterview automatically triggers Remedial Mastery Mode. Rather than simply advising the student to 'study more', the diagnostic engine performs backward depth-first search along prerequisite edges $(u, v) \in \mathcal{E}$ in the Knowledge Graph. It identifies the root concept $u$ that must be reinforced before concept $v$ can be mastered. The system synthesizes an individualized study guide featuring core definitions, common interview pitfalls, and verified textbook excerpts, providing a 1-click 'Start Focused Retest' action that re-evaluates the student strictly on targeted remedial topics.
 
 ---
 
@@ -201,12 +223,32 @@ $$	ext{MRR} = rac{1}{|\mathcal{Q}|} \sum_{i=1}^{|\mathcal{Q}|} rac{1}{	ext{ran
 | **Incomplete Basic Concept** | 45 - 60 | $64.1 \pm 6.2$ | $52.4 \pm 3.1$ | Moderate SBERT Cosine (0.58) + 50% Concept Coverage |
 | **Off-Topic Irrelevant Answer** | 0 - 15 | $38.5 \pm 11.2$ *(OVER-RATED)* | $11.6 \pm 1.9$ *(REJECTED)* | Zero Concept Coverage (0/4) + Penalized Relevance (10/100) |
 
-### D. System Integration and Boundary Verification Test Matrix
-To guarantee deterministic behavior and architectural resilience, SmartInterview was evaluated against an automated suite of end-to-end integration and edge-case boundary tests. These test scenarios target authentication security, document ingestion constraints, vector retrieval speed, deterministic Bloom state transitions (both advancement at the 80% boundary and regression below 50%), in-memory neural audio synthesis latency, and failsafe termination upon persistent fundamental struggle. Table VI details the executed test matrix and verification outcomes.
+### D. System Integration, Visual Interface, and 355-Test Verification Matrix
+To guarantee deterministic behavior and architectural resilience, SmartInterview was evaluated against an automated test suite encompassing **355 unit, integration, and security tests across all 18 engineering phases** (100% pass rate in 87.90 seconds). The platform's real-time operational interfaces were validated end-to-end:
 
-### TABLE VI: System Integration and Functional Boundary Verification Test Matrix
-| Test ID | Subsystem Evaluated | Test Scenario & Boundary Condition | Observed System Behavior | Verification Status |
-| :--- | :--- | :--- | :--- | :---: |
+![Figure 4: Real-Time Spoken Interview Room with Speech Recognition](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/13_live_interview_session.png)
+*Fig. 4. Candidate Real-Time Spoken Interview Room displaying active Bloom taxonomy badge (Level 4: Analyze), neural TTS audio playback, and live speech recognition.*
+
+![Figure 5: Candidate Multi-Factor Performance Scorecard](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/11_results_scorecard.png)
+*Fig. 5. Multi-Signal Results Scorecard featuring 5-axis competency radar breakdown, granular question transcripts, and targeted recommendation roadmaps.*
+
+![Figure 6: Remedial Mastery Mode Study Guide & Retest Trigger](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/12_remedial_mastery_mode.png)
+*Fig. 6. Remedial Mastery Mode interface displaying Knowledge Graph prerequisite diagnostics, verified textbook excerpts, common failure modes, and 1-click focused retest.*
+
+### TABLE VI: System Verification & 355-Test Matrix Across All 18 Engineering Phases
+| Phase | Subsystem & Verification Scope | Test Count | Pass Rate | Key Functional Gate Verified |
+| :---: | :--- | :---: | :---: | :--- |
+| **Phase 1** | Dense Vector RAG Baseline & S-BERT Embeddings | 25 | 100% | Cosine similarity bounds & ChromaDB HNSW indexing |
+| **Phase 2–4** | Knowledge Graph Schema, Builder & Storage | 69 | 100% | Prerequisite edge traversal & NetworkX fallback |
+| **Phase 5** | BM25 Lexical Keyword Retrieval Engine | 34 | 100% | Exact symbol & acronym tokenization (`ACID`, `2PL`) |
+| **Phase 6–7** | Graph Traversal & Reciprocal Rank Fusion | 48 | 100% | Tri-retrieval RRF fusion ($k=60$) & canonical deduplication |
+| **Phase 8** | Cross-Encoder Reranker & Scoring Convergence | 36 | 100% | Multi-signal rubric mathematical convergence |
+| **Phase 9–10** | Pipeline Integration & Bloom's Cognitive Progression | 39 | 100% | Deterministic Bloom escalation ($\ge 80\%$) & regression ($< 50\%$) |
+| **Phase 11–13** | Security Audit, Evaluation Metrics & Golden Dataset | 48 | 100% | Bcrypt auth, SQL injection protection, metric bounds |
+| **Phase 14–18** | Frozen Baseline, Hybrid Evaluation & Edge Safeguards | 56 | 100% | Starvation prevention & corrupt input safety handlers |
+| **Total** | **Comprehensive End-to-End Project Test Suite** | **355** | **100%** | **Full System Integrity Verified in 87.90s** |
+
+--- | :--- | :--- | :--- | :---: |
 | **TC-01** | Authentication & Security | Registration with existing duplicate email; bcrypt password hashing | Rejected with HTTP 400 Bad Request; zero plaintext credential leakage | **PASSED** |
 | **TC-02** | Document Ingestion | Upload of non-PDF or corrupted binary stream to resume parser | Strict header inspection rejects invalid stream; returns HTTP 400 error | **PASSED** |
 | **TC-03** | Knowledge Base RAG | Dense semantic retrieval of top-3 chunks across 8 CS domains | Retrieved within <= 80ms (mean 28.4ms); 100% relevant context returned | **PASSED** |

@@ -22,6 +22,10 @@
 | Metric / Dimension | Exact System Value | Why This Number Matters |
 | :--- | :--- | :--- |
 | **Knowledge Base Chunks** | **402 Chunks** | Curated across 8 computer science domains in ChromaDB (`technical_kb`). |
+| **Retrieval Architecture**| **Hybrid Graph RAG**| Dense (ChromaDB) + Lexical (BM25Okapi) + Graph Traversal (NetworkX) fused via RRF (k=60). |
+| **Knowledge Graph** | **50 Concepts / Directed Prereqs** | NetworkX in-memory ontology mapping concepts, prerequisites, and Bloom depths. |
+| **Remedial Mastery Mode** | **Autonomous Diagnostics** | Traces failed concepts to root prerequisite nodes; produces study notes & 1-click focused retests. |
+| **Test Suite Coverage** | **355 Tests (100% Pass)** | Comprehensive validation across 18 phases executing in 87.90s. |
 | **Technical Domains** | **8 Domains** | `oop`, `dsa`, `dbms`, `os`, `networks`, `system-design`, `cloud-devops`, `ml-dl`. |
 | **Embedding Dimensions** | **384 Dimensions** | Produced by `sentence-transformers/all-MiniLM-L6-v2` locally on CPU. |
 | **Embedding Parameters** | **22.7 Million** | Lightweight enough to vectorize sentences in under 15ms on commodity hardware. |
@@ -37,6 +41,19 @@
 ---
 
 ## 3. THE 4-TIER ARCHITECTURE AT A GLANCE
+
+![Figure 1: 4-Tier System Architecture](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Architecture.png)
+*Fig. 1. Decoupled 4-Tier Architecture.*
+
+![Figure 2: Execution Workflow](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Workflow.png)
+*Fig. 2. End-to-End Interview Execution Workflow.*
+
+![Figure 3: Relational ERD](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/ERD.png)
+*Fig. 3. 7-Table Relational Schema.*
+
+![Figure 4: Remedial Mastery Mode](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/12_remedial_mastery_mode.png)
+*Fig. 4. Remedial Mastery Mode with Knowledge Graph diagnostics.*
+
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
