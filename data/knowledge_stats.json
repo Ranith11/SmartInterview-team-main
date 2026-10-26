@@ -302,8 +302,8 @@
   "total_concepts": 50,
   "total_chunks": 402,
   "dynamic_syllabi": {
-    "total_dynamic_syllabi": 12,
-    "total_dynamic_chunks": 1222,
+    "total_dynamic_syllabi": 11,
+    "total_dynamic_chunks": 1221,
     "sessions": {
       "distributed-systems": {
         "subject": "CS450: Distributed Systems & Cloud Architectures",
@@ -370,19 +370,13 @@
         "chunks": 1,
         "filename": "dummy_syllabus.pdf",
         "timestamp": "2026-09-26 18:15:08"
-      },
-      "427bfb203c41426f83b144d55707e2fc": {
-        "subject": "React Development",
-        "chunks": 1,
-        "filename": "test_syllabus.pdf",
-        "timestamp": "2026-10-01 00:46:56"
       }
     }
   },
-  "grand_total_chunks": 1624,
+  "grand_total_chunks": 1623,
   "uploaded_syllabi": {
-    "total_courses": 12,
-    "total_syllabus_chunks": 1222,
+    "total_courses": 11,
+    "total_syllabus_chunks": 1221,
     "courses": [
       {
         "course_id": "distributed-systems",
@@ -575,25 +569,6 @@
         ],
         "status": "PASS",
         "indexed_at": "2026-09-26 18:15:08"
-      },
-      {
-        "course_id": "427bfb203c41426f83b144d55707e2fc",
-        "subject": "React Development",
-        "filename": "test_syllabus.pdf",
-        "domain": "react-development",
-        "chunks": 1,
-        "topics": [
-          "Components, Props, State",
-          "Event Handling",
-          "useState and useEffect Hooks",
-          "useReducer Hook",
-          "useContext Hook",
-          "Custom Hooks",
-          "Redux Toolkit Integration",
-          "Performance Optimization"
-        ],
-        "status": "PASS",
-        "indexed_at": "2026-10-01 00:46:56"
       }
     ]
   },
@@ -604,11 +579,11 @@
   },
   "summary": {
     "canonical_chunks": 402,
-    "uploaded_syllabus_chunks": 1222,
-    "grand_total_chunks": 1624,
+    "uploaded_syllabus_chunks": 1221,
+    "grand_total_chunks": 1623,
     "canonical_concepts": 50,
     "syllabus_course_modules": 44,
     "grand_total_knowledge_topics": 94,
-    "last_sync": "2026-10-01 00:46:56"
+    "last_sync": "2026-09-26 18:15:08"
   }
 }

@@ -7,3 +7,5 @@ python-dotenv
 pymupdf
 edge-tts
 reportlab
+networkx>=3.0
+rank-bm25>=0.2.2
