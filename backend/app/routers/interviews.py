@@ -227,6 +227,10 @@ def get_history(
             if avg_result is not None:
                 avg_score = round(float(avg_result), 1)
 
+        skills_val = s.selected_skills
+        if isinstance(skills_val, str):
+            skills_val = [item.strip() for item in skills_val.split(",") if item.strip()]
+
         result.append(HistoryItem(
             id=s.id,
             difficulty=s.difficulty,
@@ -237,11 +241,12 @@ def get_history(
             completed_at=s.completed_at,
             completion_reason=s.completion_reason,
             questions_answered=answered,
-            selected_skills=s.selected_skills,
+            selected_skills=skills_val,
             is_adaptive=s.is_adaptive,
             average_score=avg_score,
         ))
     return result
+
 
 
 @router.get("/{session_id}")
