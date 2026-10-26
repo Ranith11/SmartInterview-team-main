@@ -156,12 +156,12 @@ npm run dev
 
 ## 🧪 Comprehensive Verification & Test Suite
 
-The project includes an extensive suite of **274 unit and integration tests across 18 phases**, verifying schema contracts, BM25 exact matching, graph traversal, and failure recovery.
+The project includes an extensive, production-grade suite of **355 unit, integration, and security tests across all 18 engineering phases** (100% pass rate in 87.90s), verifying schema contracts, BM25 exact matching, graph traversal, deterministic Bloom escalation/regression, and failure recovery.
 
 Run the test suite:
 ```bash
-# Run all RAG core and integration tests
-pytest tests/test_phase*.py -v
+# Run the complete test suite
+pytest tests/ --tb=short
 
 # Run benchmark evaluations
 python scripts/benchmark_hybrid_rag.py
@@ -174,6 +174,23 @@ Tested against ground-truth technical queries across 8 core domains:
 - **Mean Reciprocal Rank (MRR):** $0.9798$
 - **Knowledge Graph Traversal Latency:** $< 12\text{ms}$ (in-memory NetworkX)
 - **End-to-End Pipeline Latency:** $< 650\text{ms}$
+
+---
+
+## 📑 Project Deliverables & PDF Quick Access
+
+All formal academic review documents, presentation decks, and technical specifications are compiled and accessible in [`PDF_Deliverables/`](PDF_Deliverables/) and [`SmartInterview_Deliverables/`](SmartInterview_Deliverables/):
+
+| Deliverable Document | Format | Description |
+|:---|:---:|:---|
+| **01. Software Requirements Specification (SRS)** | `PDF` / `DOCX` / `MD` | IEEE 830 compliant specification with 7 embedded system diagrams & UI captures |
+| **02. Project Presentation Slides (PPT)** | `PPTX` / `PDF` / `MD` | 14-slide widescreen presentation deck with embedded architecture cards & metrics |
+| **03. IEEE Technical Research Paper** | `PDF` / `DOCX` / `MD` | Formal IEEE conference paper with Tri-Retrieval formulation & 355-test matrix |
+| **04. Master Explanation & Defense Guide** | `PDF` / `MD` | Literature review comparing Nagarajan et al. & Wahid et al., viva script, & metrics |
+| **05. Quick-Revision Cheatsheet** | `PDF` / `DOCX` / `MD` | 30-second elevator pitch, formula reference card, & top 25 viva questions |
+| **06. 5-Member Presentation Plan** | `PDF` / `DOCX` / `MD` | Timed 3.5-min speaking scripts per team member & live demo walkthrough |
+| **07. Master Architectural Encyclopedia** | `PDF` / `DOCX` / `MD` | Exhaustive 30-part reference guide for hostile questioning and deep technical defense |
+| **08. Full UI Screenshot Suite** | `PNG` | 13 retina captures in [`screenshots/`](screenshots/) covering all user journeys |
 
 ---
 

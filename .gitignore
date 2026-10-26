@@ -53,4 +53,9 @@ dummy.pdf
 *.pptx
 !SmartInterview_Deliverables/**
 !SmartInterview_Progressive_Updates/**
+!PDF_Deliverables/**
+!SmartInterview_PDF_Deliverables/**
+!docs/final_deliverables/**
+!screenshots/**
+
 
