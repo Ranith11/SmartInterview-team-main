@@ -1,7 +1,13 @@
+import os
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+OUT_DIR = os.path.join(REPO_ROOT, "docs", "final_deliverables")
+os.makedirs(OUT_DIR, exist_ok=True)
+
 
 def build_pptx():
     prs = Presentation()
@@ -219,7 +225,7 @@ def build_pptx():
     for p in sub11.text_frame.paragraphs:
         p.font.size = Pt(18)
 
-    output_path = 'SmartInterview_Presentation_Final.pptx'
+    output_path = os.path.join(OUT_DIR, 'SmartInterview_Presentation_Final.pptx')
     prs.save(output_path)
     print(f"Successfully generated clean widescreen {output_path} with 11 slides!")
 

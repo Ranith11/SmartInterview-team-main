@@ -12,7 +12,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 from reportlab.pdfgen import canvas
 
-REPO_ROOT = os.path.abspath(os.path.dirname(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+OUT_DIR = os.path.join(REPO_ROOT, "docs", "final_deliverables")
+os.makedirs(OUT_DIR, exist_ok=True)
 
 def md_to_reportlab(text):
     if not text:
@@ -102,7 +104,7 @@ class SlideCanvas(canvas.Canvas):
 # 1. GENERATE PRESENTATION PDF (Landscape 16:9 Slides)
 # ==============================================================================
 def generate_presentation_pdf():
-    pdf_path = os.path.join(REPO_ROOT, "SmartInterview_Presentation_Final.pdf")
+    pdf_path = os.path.join(OUT_DIR, "SmartInterview_Presentation_Final.pdf")
     doc = SimpleDocTemplate(
         pdf_path,
         pagesize=(792, 612), # Landscape
@@ -213,7 +215,7 @@ def generate_presentation_pdf():
 # 2. GENERATE SRS PDF (Complete IEEE / ISO Software Specification PDF)
 # ==============================================================================
 def generate_srs_pdf():
-    pdf_path = os.path.join(REPO_ROOT, "SmartInterview_SRS_Final.pdf")
+    pdf_path = os.path.join(OUT_DIR, "SmartInterview_SRS_Final.pdf")
     doc = SimpleDocTemplate(
         pdf_path,
         pagesize=letter,
@@ -260,7 +262,9 @@ def generate_srs_pdf():
         if i % 2 == 1:
             # Diagram
             img_file = f"mermaid_diagram_{mermaid_img_idx}.png"
-            full_path = os.path.join(REPO_ROOT, img_file)
+            full_path = os.path.join(REPO_ROOT, "docs", "diagrams", "mermaid", img_file)
+            if not os.path.exists(full_path):
+                full_path = os.path.join(REPO_ROOT, img_file)
             if os.path.exists(full_path):
                 try:
                     pimg = Image.open(full_path)
@@ -309,7 +313,7 @@ def generate_srs_pdf():
 # 3. GENERATE RESEARCH PAPER PDF (IEEE Conference Style)
 # ==============================================================================
 def generate_research_paper_pdf():
-    pdf_path = os.path.join(REPO_ROOT, "SmartInterview_Research_Paper_Final.pdf")
+    pdf_path = os.path.join(OUT_DIR, "SmartInterview_Research_Paper_Final.pdf")
     doc = SimpleDocTemplate(
         pdf_path,
         pagesize=letter,
@@ -390,7 +394,7 @@ def generate_research_paper_pdf():
 # 4. GENERATE EXPLANATION PDF (Master Review & Defense Guide)
 # ==============================================================================
 def generate_explanation_pdf():
-    pdf_path = os.path.join(REPO_ROOT, "SmartInterview_Master_Explanation_and_Defense_Guide.pdf")
+    pdf_path = os.path.join(OUT_DIR, "SmartInterview_Master_Explanation_and_Defense_Guide.pdf")
     doc = SimpleDocTemplate(
         pdf_path,
         pagesize=letter,

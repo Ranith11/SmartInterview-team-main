@@ -13,6 +13,12 @@ except ImportError:
     print("python-docx not installed.")
     sys.exit(1)
 
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+DIAGRAM_DIR = os.path.join(REPO_ROOT, "docs", "diagrams", "mermaid")
+OUT_DIR = os.path.join(REPO_ROOT, "docs", "final_deliverables")
+os.makedirs(DIAGRAM_DIR, exist_ok=True)
+os.makedirs(OUT_DIR, exist_ok=True)
+
 def encode_mermaid(mermaid_text):
     return base64.b64encode(mermaid_text.encode('utf8')).decode('ascii')
 
@@ -38,11 +44,12 @@ def generate_docx():
     doc = Document()
     doc.add_heading('Software Requirement Specification (SRS)', 0)
 
+    srs_file = os.path.join(REPO_ROOT, 'Final_SmartInterview_SRS.md')
     try:
-        with open('Final_SmartInterview_SRS.md', 'r', encoding='utf-8') as f:
+        with open(srs_file, 'r', encoding='utf-8') as f:
             content = f.read()
     except FileNotFoundError:
-        print("Final_SmartInterview_SRS.md not found.")
+        print(f"{srs_file} not found.")
         return
 
     # Extract mermaid blocks
@@ -55,7 +62,7 @@ def generate_docx():
         if i % 2 == 1:
             # This is a mermaid block
             mermaid_text = part.strip()
-            filename = f'mermaid_diagram_{img_counter}.png'
+            filename = os.path.join(DIAGRAM_DIR, f'mermaid_diagram_{img_counter}.png')
             print(f"Downloading mermaid diagram {img_counter}...")
             if download_mermaid_image(mermaid_text, filename):
                 try:
@@ -90,7 +97,7 @@ def generate_docx():
                 else:
                     doc.add_paragraph(line.replace('**', ''))
 
-    output_file = 'SmartInterview_SRS_Final.docx'
+    output_file = os.path.join(OUT_DIR, 'SmartInterview_SRS_Final.docx')
     try:
         doc.save(output_file)
         print(f"Created {output_file}")
