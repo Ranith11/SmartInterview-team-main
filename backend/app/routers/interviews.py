@@ -51,7 +51,7 @@ from app.services.interview_service import (
     get_session_results,
 )
 from app.services.syllabus_rag_service import process_and_create_syllabus_rag
-from app.services.report_service import generate_interview_pdf_report
+from app.services.report_service import generate_interview_pdf_report, generate_remediation_notes_pdf
 from app.services.remediation_service import (
     diagnose_session,
     generate_remediation_notes,
@@ -673,6 +673,33 @@ def get_remediation_notes(
     except Exception as e:
         import traceback; traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Notes generation failed: {str(e)}")
+
+
+@router.get("/{session_id}/remediation/notes/pdf")
+def download_remediation_notes_pdf(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Generate and stream a publication-grade PDF of the AI Study Notes for weak topics.
+    """
+    try:
+        pdf_bytes = generate_remediation_notes_pdf(db, current_user, session_id)
+        filename = f"SmartInterview_StudyNotes_Session_{session_id}.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+            },
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to generate study notes PDF: {str(e)}")
 
 
 @router.post("/{session_id}/remediation/start")

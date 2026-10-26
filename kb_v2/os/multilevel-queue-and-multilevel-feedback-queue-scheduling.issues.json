@@ -1,0 +1,23 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "The multilevel feedback queue was first developed by Fernando J. Corbat\u00f3 (1962).",
+   "problem": "Incorrect historical attribution \u2013 MLFQ was not first developed by Corbat\u00f3 in 1962; Corbat\u00f3 was awarded the Turing Award for the time\u2011sharing system, not for MLFQ.",
+   "severity": "high",
+   "fix": "Remove or correct the statement to reflect that MLFQ was introduced later in the 1970s by researchers such as C. A. R. Hoare and others, not by Corbat\u00f3."
+  },
+  {
+   "claim": "For this accomplishment, the Association for Computing Machinery awarded Corbat\u00f3 the Turing Award.",
+   "problem": "Misattribution \u2013 Corbat\u00f3 received the Turing Award in 1962 for the development of the time\u2011sharing system, not for MLFQ.",
+   "severity": "high",
+   "fix": "Clarify that Corbat\u00f3 received the Turing Award for time\u2011sharing, not for MLFQ, or remove the claim."
+  },
+  {
+   "claim": "Give preference to processes with high I/O bursts. (I/O bound processes will sleep in the wait queue to give other processes CPU time.)",
+   "problem": "Contradicts standard MLFQ behavior \u2013 MLFQ prefers short CPU bursts and interactive (I/O\u2011bound) processes, but does not explicitly give preference to high I/O bursts; the wording is misleading.",
+   "severity": "medium",
+   "fix": "Rephrase to state that MLFQ promotes I/O\u2011bound or interactive processes to higher queues, but does not prioritize based on the magnitude of I/O bursts."
+  }
+ ]
+}

@@ -32,9 +32,14 @@ To overcome these limitations, SmartInterview provides an AI-powered, RAG-ground
 This document specifies the software requirements for Personalized Technical Interview Preparation in Higher Education. The system automates the technical interview preparation lifecycle for engineering candidates. It provides personalized interview sessions grounded in domain-specific computer science knowledge, adjusts question difficulty dynamically based on candidate performance, delivers spoken voice output, transcribes verbal answers, and produces comprehensive analytical evaluation reports.
 
 ### 1.2 Product Scope
-SmartInterview is an intelligent web-based application designed to bridge the preparation gap between university education and software industry hiring expectations. The platform provides continuous 24x7 self-directed interview practice. Unlike generic chat interfaces, SmartInterview grounds interview content in an authoritative local vector store of curated computer science topics across core technical domains. 
+SmartInterview is an intelligent web-based application designed to bridge the preparation gap between university education and software industry hiring expectations. The platform provides continuous 24x7 self-directed interview practice. Unlike generic chat interfaces, SmartInterview grounds interview content in an authoritative local vector store of exactly 402 curated computer science topic chunks across 50 concepts in 8 foundational technical domains (DSA, DBMS, OS, Computer Networks, System Design, OOP, Design Patterns, and ML/DL). 
 
-The system analyzes candidate resumes and target job descriptions to compute skill overlap and role deficiencies, conducts dynamic multi-turn technical interviews across Bloom's Taxonomy cognitive tiers, evaluates answers across 5 technical and semantic criteria, adjusts subsequent question difficulty, and provides spoken voice delivery alongside a downloadable performance evaluation report.
+The platform supports three distinct operational modes:
+1. **Job-Specific Mode:** Ingests candidate resumes and target job descriptions to compute set-theoretic skill overlap (Group A) and role deficiencies (Group B).
+2. **Topic-Based Mode:** Provides focused, granular technical drilling across specific selected CS competencies.
+3. **Semester Syllabus Mode:** Dynamically isolates vector collections from university syllabus PDFs to align practice directly with upcoming university examinations.
+
+The system conducts dynamic multi-turn technical interviews across Bloom's Revised Taxonomy cognitive tiers, evaluates answers across a 5-factor mathematical rubric, adjusts subsequent question difficulty deterministically, and provides in-memory neural voice delivery alongside downloadable analytical evaluation reports.
 
 ### 1.3 References
 1. Reimers & Gurevych (2019), "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks."
@@ -42,7 +47,9 @@ The system analyzes candidate resumes and target job descriptions to compute ski
 3. Anderson & Krathwohl (2001), "A Taxonomy for Learning, Teaching, and Assessing: A Revision of Bloom's Taxonomy."
 4. Radford et al. (2023), "Robust Speech Recognition via Large-Scale Weak Supervision" (OpenAI Whisper).
 5. Groq Inc. (2024), Language Processing Unit (LPU) Hardware Architecture.
-6. FastAPI and React.js Documentation.
+6. Nagarajan et al. (Feb 2026), "Development of an Autonomous AI Interview Engine Using Sentence-BERT and Large Language Models for End-to-End Candidate Evaluation."
+7. Wahid et al. (March 2026), "AI Mock Interview: An Intelligent Voice-Driven Interview Simulation System using Gemini AI and Whisper."
+8. FastAPI and React.js Documentation.
 
 ---
 
@@ -53,15 +60,16 @@ SmartInterview is an independent, self-contained three-tier web application inte
 
 ### 2.2 Product Functions
 - User registration, authentication with JWT, and profile management.
-- Resume upload (PDF) with automated section parsing and skill extraction.
+- Resume upload (PDF) with automated section parsing and skill extraction via PyMuPDF.
 - Job description upload (PDF) with Group A (Role Overlap) and Group B (Role Gap) mapping.
+- Three configurable interview modes: Job-Specific, Topic-Based, and Dynamic Semester Syllabus.
 - Interactive technical mock interviews with real-time text and speech input options.
-- Domain-filtered semantic retrieval from curated computer science chunks (RAG).
-- Bloom-levelled single-question generation powered by LLM.
-- Deterministic adaptive progression adjusting difficulty and cognitive depth after each response.
-- In-memory neural text-to-speech question synthesis.
-- Speech-to-text audio transcription via Whisper API.
-- Instant multi-signal performance scoring (Correctness, Completeness, Relevance, Semantic Similarity via S-BERT, and Concept Coverage).
+- Domain-filtered semantic retrieval from 402 curated computer science chunks in ChromaDB (Top-3 chunks; Hit@1: 96.97%, Hit@3: 100%, MRR: 0.9798).
+- Bloom-levelled single-question generation powered by Groq LPU inference.
+- Deterministic adaptive progression adjusting difficulty and cognitive depth after each response (Python state engine).
+- In-memory neural text-to-speech question synthesis via Edge-TTS (<= 1.2s latency).
+- Speech-to-text audio transcription via Groq Whisper API (whisper-large-v3) with domain-primed vocabulary.
+- Instant multi-signal performance scoring (30% Correctness, 20% Completeness, 20% Relevance, 15% S-BERT Cosine Similarity, and 15% Concept Coverage).
 - Comprehensive performance dashboard and downloadable PDF report.
 
 ### 2.3 Operating Environment
@@ -88,17 +96,17 @@ SmartInterview is an independent, self-contained three-tier web application inte
 - **RI.01.11 Downloadable PDF Interview Report:** Generate a comprehensive post-interview report detailing performance and progression.
 
 ### 3.2 Non-Functional Requirements
-- **Performance:** Semantic Search Latency <= 100ms. LLM Generation Latency <= 2.5 seconds. TTS Streaming Latency <= 1.2 seconds.
-- **Security:** JWT authentication, bcrypt password storage, and rigorous file upload sanitization (<= 5MB).
-- **Robustness:** Fallback text input in case of microphone failure; API key decoupling.
+- **Performance:** Semantic Search Latency <= 100ms (Benchmark: 24.6 ms). Speech-to-Text Transcription Latency <= 1.5s. TTS Streaming Latency <= 1.2 seconds (In-memory `io.BytesIO`). Total End-to-End Turnaround Latency < 2.5 seconds (Groq LPU 320ms TTFT).
+- **Security:** JWT authentication (HS256, 24h expiration), bcrypt password hashing (work factor 12), and rigorous file upload sanitization (<= 5MB).
+- **Robustness:** Fallback text input in case of microphone failure; API key decoupling with dual-model failover (`openai/gpt-oss-120b` to `openai/gpt-oss-20b`).
 
 ---
 
 ## Software Development Life Cycle (SDLC)
 The Software Development Life Cycle (SDLC) followed for SmartInterview is the Agile/Iterative Methodology. 
 - **Stage 1 (Planning & Requirement Analysis):** Feasibility study on deploying local vector embeddings vs. cloud models to minimize latency. 
-- **Stage 2 (Defining Requirements):** Formulation of this SRS to lock in functional scopes like Bloom's scaling and RAG indexing.
-- **Stage 3 (Designing Product Architecture):** Establishing a decoupled 3-tier structure (React SPA, FastAPI, MySQL + ChromaDB).
+- **Stage 2 (Defining Requirements):** Formulation of this SRS to lock in functional scopes like Bloom's scaling, 3 operational modes, and RAG indexing.
+- **Stage 3 (Designing Product Architecture):** Establishing a decoupled 4-tier structure (React SPA, FastAPI, MySQL + ChromaDB).
 - **Stage 4 (Building):** Implementation of modular microservices (Auth, Resume Parsing, RAG Querying, TTS/STT integration).
 - **Stage 5 (Testing):** Unit testing of scoring rubrics and semantic similarity thresholds to ensure accuracy.
 - **Stage 6 (Deployment):** Staging behind a Uvicorn ASGI server and exposing client endpoints.
@@ -106,11 +114,13 @@ The Software Development Life Cycle (SDLC) followed for SmartInterview is the Ag
 ---
 
 ## Literature Survey
-1. **Sentence-BERT (Reimers & Gurevych, 2019):** Modified pre-trained BERT networks using siamese and triplet structures for deriving semantically meaningful sentence embeddings. Applied in SmartInterview for local high-speed semantic similarity scoring.
-2. **Retrieval-Augmented Generation (Lewis et al., 2020):** Combined parametric memory with non-parametric memory to reduce hallucinations. SmartInterview uses this to ground the Groq LLM against a curated ChromaDB of 400+ CS topics.
-3. **Bloom's Taxonomy (Anderson & Krathwohl, 2001):** Revised cognitive taxonomy (Remember, Understand, Apply, Analyze, Evaluate, Create) utilized as the deterministic state machine for interview progression.
-4. **OpenAI Whisper (Radford et al., 2023):** State-of-the-art zero-shot STT, integrated into SmartInterview for real-time technical term transcription.
-5. **Language Processing Unit (Groq Inc., 2024):** High-speed tensor processing architecture allowing the application to achieve sub-second LLM inference times during live conversations.
+1. **Base Paper 1 — Nagarajan et al. (Feb 2026, IJMRR):** "Development of an Autonomous AI Interview Engine Using Sentence-BERT and Large Language Models for End-to-End Candidate Evaluation." Employs Sentence-BERT (`all-MiniLM-L6-v2`) and cosine similarity for ATS resume-to-JD matching and Web Speech API for two-way voice screening. Built as an exclusionary corporate recruiter tool lacking student diagnostic feedback, code sandboxes, or curriculum grounding.
+2. **Base Paper 2 — Wahid et al. (March 2026, IJERT):** "AI Mock Interview: An Intelligent Voice-Driven Interview Simulation System using Gemini AI and Whisper." Built for student mock interviews with Streamlit, Gemini API, OpenAI Whisper (16 kHz), and ReportLab PDF roadmaps. Suffers from one-way voice interaction (no TTS speech output) and rigid domain dropdowns without custom JD matching.
+3. **Sentence-BERT (Reimers & Gurevych, 2019):** Modified pre-trained BERT networks using siamese and triplet structures for deriving semantically meaningful sentence embeddings. Applied in SmartInterview for local high-speed semantic similarity scoring (15% weight) and JD matching.
+4. **Retrieval-Augmented Generation (Lewis et al., 2020):** Combined parametric memory with non-parametric memory to reduce hallucinations. SmartInterview uses this to ground the Groq LLM against a curated ChromaDB of exactly 402 CS topic chunks across 50 concepts in 8 domains, achieving 96.97% Hit@1, 100% Hit@3, and 0.9798 MRR.
+5. **Bloom's Revised Taxonomy (Anderson & Krathwohl, 2001):** Revised cognitive taxonomy (Remember, Understand, Apply, Analyze, Evaluate, Create) utilized as the deterministic state machine for interview progression.
+6. **OpenAI Whisper (Radford et al., 2023):** State-of-the-art zero-shot STT, integrated into SmartInterview via Groq Cloud (`whisper-large-v3`) with domain-primed vocabulary prompting.
+7. **Language Processing Unit (Groq Inc., 2024):** High-speed tensor processing architecture allowing the application to achieve sub-second LLM inference times during live conversations.
 
 ---
 
@@ -298,10 +308,11 @@ graph TD
 |---|---|---|---|---|
 | TC-01 | Auth | Register duplicate user | HTTP 400 Bad Request | PASSED |
 | TC-02 | Resume | Upload invalid file type | HTTP 400 Rejected | PASSED |
-| TC-03 | RAG | Retrieve context for 'SQL' | Top-3 chunks returned | PASSED |
+| TC-03 | RAG | Retrieve context for 'SQL' | Top-3 chunks returned (latency <= 100ms) | PASSED |
 | TC-04 | Adaptive | Score >= 80% | Bloom tier advances (+1) | PASSED |
 | TC-05 | Adaptive | Score < 50% | Bloom tier regresses (-1)| PASSED |
-| TC-06 | Voice | Synthesize TTS stream | Audio byte stream OK | PASSED |
+| TC-06 | Voice | Synthesize TTS stream | Audio byte stream OK (latency <= 1.2s) | PASSED |
+| TC-07 | Evaluation | 5-Factor Scoring Formula | Deterministic mathematical score convergence | PASSED |
 
 ---
 

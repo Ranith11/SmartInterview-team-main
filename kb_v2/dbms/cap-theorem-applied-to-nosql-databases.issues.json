@@ -1,0 +1,29 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "NoSQL databases date back to the late 1960s",
+   "problem": "Historical claim is incorrect; the first non\u2011relational systems appeared in the 1970s/1980s, but the term \"NoSQL\" was coined in the early 2000s.",
+   "severity": "medium",
+   "fix": "Replace with \"NoSQL databases emerged in the early 2000s, although earlier non\u2011relational systems existed in the 1970s/1980s.\""
+  },
+  {
+   "claim": "NoSQL databases use a single data structure\u2014such as key\u2013value pairs, wide columns, graphs, or documents",
+   "problem": "The statement is contradictory; NoSQL databases use multiple data models, not a single one.",
+   "severity": "medium",
+   "fix": "Rephrase to \"NoSQL databases support multiple data models, including key\u2013value, wide\u2011column, graph, and document.\""
+  },
+  {
+   "claim": "MongoDB includes full ACID transaction support",
+   "problem": "MongoDB provides ACID guarantees only for single\u2011document operations; multi\u2011document transactions are a more recent feature and not universally supported across all deployments.",
+   "severity": "medium",
+   "fix": "Clarify that MongoDB offers ACID semantics for single documents and, in recent versions, multi\u2011document transactions with certain limitations."
+  },
+  {
+   "claim": "NoSQL RDBMS is distinct from the around\u20112009 general concept of NoSQL databases",
+   "problem": "The claim conflates an early 1998 project with the modern NoSQL movement; the 1998 Strozzi project was a relational database that simply omitted an SQL interface, not a non\u2011relational system.",
+   "severity": "medium",
+   "fix": "State that the 1998 Strozzi project was a relational database that did not expose SQL, and that the modern NoSQL movement began in 2009."
+  }
+ ]
+}

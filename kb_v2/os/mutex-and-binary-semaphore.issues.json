@@ -1,0 +1,23 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "A binary semaphore is just a mutex.",
+   "problem": "Binary semaphores do not enforce ownership; any thread may signal them, whereas mutexes require the owning thread to unlock. Thus they are not interchangeable.",
+   "severity": "high",
+   "fix": "Clarify that a binary semaphore is a special case of a counting semaphore (max\u202f=\u202f1) and that it lacks ownership semantics, making it unsuitable as a drop\u2011in replacement for a mutex."
+  },
+  {
+   "claim": "Binary semaphores cannot be signaled when no thread is waiting, and doing so causes nothing bad to happen.",
+   "problem": "A binary semaphore can be signaled even if no thread is waiting; its value simply increments to 1, allowing the next wait to succeed immediately. This can mask logic errors but is not inherently harmful.",
+   "severity": "medium",
+   "fix": "Explain that signaling an unused binary semaphore is allowed and may hide bugs, but it does not cause a runtime error."
+  },
+  {
+   "claim": "Mutexes never cause deadlock.",
+   "problem": "Mutexes can still participate in classic deadlock scenarios (e.g., circular wait on multiple mutexes). Ownership does not eliminate all deadlock possibilities.",
+   "severity": "medium",
+   "fix": "Add that while ownership reduces certain mistakes, mutexes can still deadlock if multiple locks are acquired in conflicting orders."
+  }
+ ]
+}

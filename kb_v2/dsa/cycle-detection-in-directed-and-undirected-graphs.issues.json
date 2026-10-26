@@ -1,0 +1,11 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "In an undirected graph, only O(n) time is required to find a cycle in an n-vertex graph, since at most n \u2212 1 edges can be tree edges.",
+   "problem": "The statement incorrectly claims that cycle detection in an undirected graph can be done in linear time proportional only to the number of vertices. In fact, the standard DFS\u2011based algorithm runs in O(V+E) time, which can be \u0398(V+E) and not \u0398(V) when the graph is dense. The claim that only O(n) time is sufficient is therefore false.",
+   "severity": "high",
+   "fix": "Replace the claim with the correct complexity: cycle detection in an undirected graph using DFS runs in O(V+E) time and space."
+  }
+ ]
+}

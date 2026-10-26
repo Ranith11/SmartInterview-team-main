@@ -17,10 +17,13 @@ def encode_mermaid(mermaid_text):
     return base64.b64encode(mermaid_text.encode('utf8')).decode('ascii')
 
 def download_mermaid_image(mermaid_text, filename):
+    if os.path.exists(filename) and os.path.getsize(filename) > 0:
+        print(f"Using local cached diagram {filename}")
+        return True
     b64 = encode_mermaid(mermaid_text)
     url = f'https://mermaid.ink/img/{b64}'
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=5)
         if r.status_code == 200:
             with open(filename, 'wb') as f:
                 f.write(r.content)
