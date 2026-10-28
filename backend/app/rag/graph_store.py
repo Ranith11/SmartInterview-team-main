@@ -663,22 +663,69 @@ class Neo4jGraphStore(BaseGraphStore):
             return [dict(rec["c"]) for rec in res]
 
     def get_subgraph(self, concept_ids: List[str], max_depth: int = 1) -> dict:
-        cypher = """
+        # Neo4j does not support parameterised variable-length ranges,
+        # so we inject the sanitised integer directly into the query.
+        depth = max(1, int(max_depth))
+        cypher = f"""
         MATCH (c:Concept) WHERE c.id IN $ids
-        OPTIONAL MATCH (c)-[r:PREREQUISITE_OF|RELATED_TO*1..1]-(neighbor:Concept)
+        OPTIONAL MATCH (c)-[r:PREREQUISITE_OF|RELATED_TO*1..{depth}]-(neighbor:Concept)
         RETURN c, r, neighbor
         """
         driver = self._get_driver()
         with driver.session(database=self._database) as session:
             res = session.run(cypher, ids=concept_ids)
-            nodes_map = {}
-            edges = []
+            nodes_map: Dict[str, dict] = {}
+            edges: List[dict] = []
+            seen_edges: set = set()
             for rec in res:
+                # primary concept node
                 c = dict(rec["c"])
                 nodes_map[c["id"]] = c
-                if rec["neighbor"]:
-                    nbr = dict(rec["neighbor"])
+
+                # neighbor node, if any
+                neighbor = rec.get("neighbor")
+                if neighbor is not None:
+                    nbr = dict(neighbor)
                     nodes_map[nbr["id"]] = nbr
+
+                # relationship(s) - variable-length match may return a list
+                rels_raw = rec.get("r")
+                if rels_raw is None:
+                    continue
+                rel_list = rels_raw if isinstance(rels_raw, list) else [rels_raw]
+                for rel in rel_list:
+                    if rel is None:
+                        continue
+                    # Extract source and target node ids
+                    try:
+                        src = dict(rel.start_node).get("id", str(rel.start_node.id))
+                    except Exception:
+                        src = None
+                    try:
+                        tgt = dict(rel.end_node).get("id", str(rel.end_node.id))
+                    except Exception:
+                        tgt = None
+                    rel_type = rel.type if hasattr(rel, "type") else "RELATED_TO"
+                    # Deduplicate edges
+                    edge_key = (src, tgt, rel_type)
+                    if edge_key in seen_edges:
+                        continue
+                    seen_edges.add(edge_key)
+                    edge: dict = {
+                        "source_id": src,
+                        "target_id": tgt,
+                        "relation": rel_type,
+                    }
+                    # Merge any additional relationship properties
+                    try:
+                        props = dict(rel)
+                        for k, v in props.items():
+                            if k not in edge:
+                                edge[k] = v
+                    except Exception:
+                        pass
+                    edges.append(edge)
+
             return {
                 "nodes": list(nodes_map.values()),
                 "edges": edges,
