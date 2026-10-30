@@ -545,7 +545,7 @@ def generate_syllabus_question(
 
     # 3. Build strictly source-grounded prompt
     if rag_chunks:
-        rag_parts = [f"[Excerpt {j+1} - {c['domain']}]:\n{c['text'][:500]}" for j, c in enumerate(rag_chunks)]
+        rag_parts = [f"[Excerpt {j+1} - {c['domain']}]:\n{c['text']}" for j, c in enumerate(rag_chunks)]
         rag_text = "\n---\n".join(rag_parts)
     else:
         rag_text = "No excerpts found."
