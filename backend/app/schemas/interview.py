@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, Union
 from datetime import datetime
+
 
 
 class StartInterviewRequest(BaseModel):
@@ -102,7 +103,11 @@ class AdaptiveStartResponse(BaseModel):
 # ── Answer Request ────────────────────────────────────────
 
 class AnswerRequest(BaseModel):
-    answer_text: str = Field(default="", max_length=5000)
+    answer_text: Optional[str] = Field(default="")
+
+    model_config = {
+        "extra": "allow"
+    }
 
 
 # ── History ───────────────────────────────────────────────
@@ -117,8 +122,9 @@ class HistoryItem(BaseModel):
     completed_at: Optional[datetime] = None
     completion_reason: Optional[str] = None
     questions_answered: int = 0
-    selected_skills: Optional[List[str]] = None
+    selected_skills: Optional[Union[List[str], str]] = None
     is_adaptive: Optional[bool] = None
+
     average_score: Optional[float] = None
 
     class Config:

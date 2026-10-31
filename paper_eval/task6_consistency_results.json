@@ -1,0 +1,823 @@
+{
+  "experiment_metadata": {
+    "title": "SmartInterview Task 6 Scoring Consistency Experiment",
+    "date": "2026-10-27",
+    "model": "openai/gpt-oss-120b",
+    "temperature": 0.3,
+    "repetitions": 5,
+    "total_answers_evaluated": 10,
+    "note": "Answers authored across 5 canonical CS questions representing strong and weak quality."
+  },
+  "results": [
+    {
+      "question_id": "Q1_DBMS",
+      "answer_id": "Q1_A_Strong",
+      "quality": "Strong",
+      "question": "What are the ACID properties in database transactions?",
+      "answer": "ACID stands for Atomicity, Consistency, Isolation, and Durability. Atomicity guarantees all operations in a transaction succeed completely or roll back entirely (all-or-nothing). Consistency ensures the database transitions between valid states, preserving all schema constraints and foreign keys. Isolation ensures concurrently executing transactions do not interfere with one another, avoiding dirty or non-repeatable reads. Durability guarantees that once committed, changes permanently survive system crashes or power failures via write-ahead logging.",
+      "llm_only": {
+        "scores": [
+          88,
+          85,
+          85,
+          88,
+          88
+        ],
+        "mean": 86.8,
+        "std": 1.47
+      },
+      "five_factor_rubric": {
+        "scores": [
+          88,
+          87,
+          89,
+          88,
+          88
+        ],
+        "mean": 88.0,
+        "std": 0.63
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 88,
+          "full_overall": 88,
+          "t": 88,
+          "c": 82,
+          "r": 92,
+          "s": 100,
+          "k": 82
+        },
+        {
+          "run": 2,
+          "llm_technical": 85,
+          "full_overall": 87,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 82
+        },
+        {
+          "run": 3,
+          "llm_technical": 85,
+          "full_overall": 89,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 95
+        },
+        {
+          "run": 4,
+          "llm_technical": 88,
+          "full_overall": 88,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 90
+        },
+        {
+          "run": 5,
+          "llm_technical": 88,
+          "full_overall": 88,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 92
+        }
+      ]
+    },
+    {
+      "question_id": "Q1_DBMS",
+      "answer_id": "Q1_B_Weak",
+      "quality": "Weak",
+      "question": "What are the ACID properties in database transactions?",
+      "answer": "ACID makes transactions reliable. Atomicity means atomic operations, consistency keeps things consistent, isolation means servers are isolated from each other, and durability means data stays on disk for a long time.",
+      "llm_only": {
+        "scores": [
+          45,
+          45,
+          30,
+          30,
+          45
+        ],
+        "mean": 39.0,
+        "std": 7.35
+      },
+      "five_factor_rubric": {
+        "scores": [
+          62,
+          60,
+          52,
+          61,
+          62
+        ],
+        "mean": 59.4,
+        "std": 3.77
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 45,
+          "full_overall": 62,
+          "t": 45,
+          "c": 40,
+          "r": 70,
+          "s": 100,
+          "k": 75
+        },
+        {
+          "run": 2,
+          "llm_technical": 45,
+          "full_overall": 60,
+          "t": 48,
+          "c": 42,
+          "r": 58,
+          "s": 100,
+          "k": 68
+        },
+        {
+          "run": 3,
+          "llm_technical": 30,
+          "full_overall": 52,
+          "t": 30,
+          "c": 25,
+          "r": 70,
+          "s": 100,
+          "k": 58
+        },
+        {
+          "run": 4,
+          "llm_technical": 30,
+          "full_overall": 61,
+          "t": 45,
+          "c": 40,
+          "r": 70,
+          "s": 100,
+          "k": 68
+        },
+        {
+          "run": 5,
+          "llm_technical": 45,
+          "full_overall": 62,
+          "t": 45,
+          "c": 40,
+          "r": 70,
+          "s": 100,
+          "k": 78
+        }
+      ]
+    },
+    {
+      "question_id": "Q2_CN",
+      "answer_id": "Q2_A_Strong",
+      "quality": "Strong",
+      "question": "How is HTTP different from HTTPS?",
+      "answer": "HTTP transmits plaintext traffic over port 80 without encryption, leaving communication exposed to eavesdropping and MITM attacks. HTTPS wraps HTTP traffic inside a TLS/SSL cryptographic tunnel over port 443. It authenticates the server via digital X.509 certificates and performs an asymmetric handshake to establish symmetric session encryption, guaranteeing confidentiality, message integrity, and identity verification.",
+      "llm_only": {
+        "scores": [
+          85,
+          88,
+          90,
+          88,
+          88
+        ],
+        "mean": 87.8,
+        "std": 1.6
+      },
+      "five_factor_rubric": {
+        "scores": [
+          88,
+          90,
+          88,
+          88,
+          90
+        ],
+        "mean": 88.8,
+        "std": 0.98
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 85,
+          "full_overall": 88,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 92
+        },
+        {
+          "run": 2,
+          "llm_technical": 88,
+          "full_overall": 90,
+          "t": 88,
+          "c": 82,
+          "r": 92,
+          "s": 100,
+          "k": 92
+        },
+        {
+          "run": 3,
+          "llm_technical": 90,
+          "full_overall": 88,
+          "t": 88,
+          "c": 80,
+          "r": 95,
+          "s": 100,
+          "k": 79
+        },
+        {
+          "run": 4,
+          "llm_technical": 88,
+          "full_overall": 88,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 88
+        },
+        {
+          "run": 5,
+          "llm_technical": 88,
+          "full_overall": 90,
+          "t": 88,
+          "c": 80,
+          "r": 92,
+          "s": 100,
+          "k": 92
+        }
+      ]
+    },
+    {
+      "question_id": "Q2_CN",
+      "answer_id": "Q2_B_Weak",
+      "quality": "Weak",
+      "question": "How is HTTP different from HTTPS?",
+      "answer": "HTTPS is just a secure version of HTTP. It has an extra 'S' and shows a green padlock in web browsers. HTTP is older and less safe because hackers can read your passwords.",
+      "llm_only": {
+        "scores": [
+          45,
+          55,
+          50,
+          30,
+          0
+        ],
+        "mean": 36.0,
+        "std": 19.85
+      },
+      "five_factor_rubric": {
+        "scores": [
+          52,
+          56,
+          58,
+          55,
+          47
+        ],
+        "mean": 53.6,
+        "std": 3.83
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 45,
+          "full_overall": 52,
+          "t": 45,
+          "c": 40,
+          "r": 55,
+          "s": 100,
+          "k": 30
+        },
+        {
+          "run": 2,
+          "llm_technical": 55,
+          "full_overall": 56,
+          "t": 55,
+          "c": 40,
+          "r": 60,
+          "s": 100,
+          "k": 32
+        },
+        {
+          "run": 3,
+          "llm_technical": 50,
+          "full_overall": 58,
+          "t": 55,
+          "c": 35,
+          "r": 70,
+          "s": 100,
+          "k": 40
+        },
+        {
+          "run": 4,
+          "llm_technical": 30,
+          "full_overall": 55,
+          "t": 55,
+          "c": 30,
+          "r": 60,
+          "s": 100,
+          "k": 36
+        },
+        {
+          "run": 5,
+          "llm_technical": 0,
+          "full_overall": 47,
+          "t": 35,
+          "c": 30,
+          "r": 55,
+          "s": 100,
+          "k": 30
+        }
+      ]
+    },
+    {
+      "question_id": "Q3_OS",
+      "answer_id": "Q3_A_Strong",
+      "quality": "Strong",
+      "question": "How is a process different from a thread?",
+      "answer": "A process is an executing program instance with its own isolated virtual memory address space, file descriptor table, and security context. A thread is the smallest schedulable execution unit within a process. Multiple threads within the same process share the heap, global variables, and code segments, but each thread possesses its own private stack and CPU registers. Context switching between threads incurs less overhead because page tables do not need to be flushed.",
+      "llm_only": {
+        "scores": [
+          85,
+          90,
+          88,
+          88,
+          88
+        ],
+        "mean": 87.8,
+        "std": 1.6
+      },
+      "five_factor_rubric": {
+        "scores": [
+          85,
+          84,
+          84,
+          85,
+          83
+        ],
+        "mean": 84.2,
+        "std": 0.75
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 85,
+          "full_overall": 85,
+          "t": 85,
+          "c": 78,
+          "r": 92,
+          "s": 100,
+          "k": 70
+        },
+        {
+          "run": 2,
+          "llm_technical": 90,
+          "full_overall": 84,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 100,
+          "k": 66
+        },
+        {
+          "run": 3,
+          "llm_technical": 88,
+          "full_overall": 84,
+          "t": 85,
+          "c": 75,
+          "r": 90,
+          "s": 100,
+          "k": 71
+        },
+        {
+          "run": 4,
+          "llm_technical": 88,
+          "full_overall": 85,
+          "t": 85,
+          "c": 70,
+          "r": 92,
+          "s": 100,
+          "k": 79
+        },
+        {
+          "run": 5,
+          "llm_technical": 88,
+          "full_overall": 83,
+          "t": 85,
+          "c": 70,
+          "r": 90,
+          "s": 100,
+          "k": 67
+        }
+      ]
+    },
+    {
+      "question_id": "Q3_OS",
+      "answer_id": "Q3_B_Weak",
+      "quality": "Weak",
+      "question": "How is a process different from a thread?",
+      "answer": "A process is a program you run like Microsoft Word. A thread is lightweight and does background tasks inside Java or Python. Processes take more memory and take longer to start.",
+      "llm_only": {
+        "scores": [
+          45,
+          45,
+          45,
+          55,
+          45
+        ],
+        "mean": 47.0,
+        "std": 4.0
+      },
+      "five_factor_rubric": {
+        "scores": [
+          52,
+          50,
+          57,
+          59,
+          48
+        ],
+        "mean": 53.2,
+        "std": 4.17
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 45,
+          "full_overall": 52,
+          "t": 45,
+          "c": 35,
+          "r": 60,
+          "s": 100,
+          "k": 30
+        },
+        {
+          "run": 2,
+          "llm_technical": 45,
+          "full_overall": 50,
+          "t": 45,
+          "c": 30,
+          "r": 55,
+          "s": 100,
+          "k": 32
+        },
+        {
+          "run": 3,
+          "llm_technical": 45,
+          "full_overall": 57,
+          "t": 55,
+          "c": 45,
+          "r": 60,
+          "s": 100,
+          "k": 30
+        },
+        {
+          "run": 4,
+          "llm_technical": 55,
+          "full_overall": 59,
+          "t": 45,
+          "c": 40,
+          "r": 55,
+          "s": 100,
+          "k": 75
+        },
+        {
+          "run": 5,
+          "llm_technical": 45,
+          "full_overall": 48,
+          "t": 35,
+          "c": 30,
+          "r": 55,
+          "s": 100,
+          "k": 35
+        }
+      ]
+    },
+    {
+      "question_id": "Q4_DSA",
+      "answer_id": "Q4_A_Strong",
+      "quality": "Strong",
+      "question": "How does a hash table resolve collisions?",
+      "answer": "Hash collisions occur when distinct keys hash to the same bucket index. The two primary resolution techniques are Separate Chaining and Open Addressing. In separate chaining, each table index points to a linked list or self-balancing binary search tree holding colliding items. In open addressing, all entries occupy the main table array directly; when a collision occurs, alternative vacant slots are located using probing sequences such as linear probing, quadratic probing, or double hashing.",
+      "llm_only": {
+        "scores": [
+          78,
+          78,
+          75,
+          70,
+          78
+        ],
+        "mean": 75.8,
+        "std": 3.12
+      },
+      "five_factor_rubric": {
+        "scores": [
+          76,
+          76,
+          74,
+          82,
+          78
+        ],
+        "mean": 77.2,
+        "std": 2.71
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 78,
+          "full_overall": 76,
+          "t": 78,
+          "c": 68,
+          "r": 70,
+          "s": 100,
+          "k": 70
+        },
+        {
+          "run": 2,
+          "llm_technical": 78,
+          "full_overall": 76,
+          "t": 78,
+          "c": 68,
+          "r": 70,
+          "s": 100,
+          "k": 68
+        },
+        {
+          "run": 3,
+          "llm_technical": 75,
+          "full_overall": 74,
+          "t": 72,
+          "c": 68,
+          "r": 62,
+          "s": 100,
+          "k": 75
+        },
+        {
+          "run": 4,
+          "llm_technical": 70,
+          "full_overall": 82,
+          "t": 85,
+          "c": 80,
+          "r": 70,
+          "s": 100,
+          "k": 75
+        },
+        {
+          "run": 5,
+          "llm_technical": 78,
+          "full_overall": 78,
+          "t": 78,
+          "c": 68,
+          "r": 72,
+          "s": 100,
+          "k": 75
+        }
+      ]
+    },
+    {
+      "question_id": "Q4_DSA",
+      "answer_id": "Q4_B_Weak",
+      "quality": "Weak",
+      "question": "How does a hash table resolve collisions?",
+      "answer": "Collisions happen when two keys get the same number from the hash function. You can fix this by chaining them into a list or finding the next open spot. Resizing the hash table also helps prevent collisions.",
+      "llm_only": {
+        "scores": [
+          62,
+          68,
+          65,
+          70,
+          65
+        ],
+        "mean": 66.0,
+        "std": 2.76
+      },
+      "five_factor_rubric": {
+        "scores": [
+          57,
+          66,
+          61,
+          62,
+          65
+        ],
+        "mean": 62.2,
+        "std": 3.19
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 62,
+          "full_overall": 57,
+          "t": 58,
+          "c": 45,
+          "r": 70,
+          "s": 71,
+          "k": 42
+        },
+        {
+          "run": 2,
+          "llm_technical": 68,
+          "full_overall": 66,
+          "t": 68,
+          "c": 58,
+          "r": 82,
+          "s": 71,
+          "k": 44
+        },
+        {
+          "run": 3,
+          "llm_technical": 65,
+          "full_overall": 61,
+          "t": 65,
+          "c": 55,
+          "r": 70,
+          "s": 71,
+          "k": 39
+        },
+        {
+          "run": 4,
+          "llm_technical": 70,
+          "full_overall": 62,
+          "t": 65,
+          "c": 55,
+          "r": 70,
+          "s": 71,
+          "k": 49
+        },
+        {
+          "run": 5,
+          "llm_technical": 65,
+          "full_overall": 65,
+          "t": 68,
+          "c": 55,
+          "r": 70,
+          "s": 71,
+          "k": 61
+        }
+      ]
+    },
+    {
+      "question_id": "Q5_SYS",
+      "answer_id": "Q5_A_Strong",
+      "quality": "Strong",
+      "question": "Why do we use caching in distributed systems?",
+      "answer": "In distributed systems, caching dramatically reduces read latencies and protects persistent storage databases from query saturation by exploiting temporal and spatial locality. High-speed in-memory caches like Redis or Memcached serve hot data in sub-millisecond time. Standard caching patterns include Cache-Aside, Write-Through, and Write-Back, coupled with TTLs and eviction policies like LRU or LFU to manage memory bounds and mitigate stale reads.",
+      "llm_only": {
+        "scores": [
+          85,
+          85,
+          85,
+          85,
+          85
+        ],
+        "mean": 85.0,
+        "std": 0.0
+      },
+      "five_factor_rubric": {
+        "scores": [
+          87,
+          88,
+          87,
+          89,
+          89
+        ],
+        "mean": 88.0,
+        "std": 0.89
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 85,
+          "full_overall": 87,
+          "t": 88,
+          "c": 84,
+          "r": 92,
+          "s": 92,
+          "k": 79
+        },
+        {
+          "run": 2,
+          "llm_technical": 85,
+          "full_overall": 88,
+          "t": 88,
+          "c": 82,
+          "r": 90,
+          "s": 92,
+          "k": 92
+        },
+        {
+          "run": 3,
+          "llm_technical": 85,
+          "full_overall": 87,
+          "t": 85,
+          "c": 80,
+          "r": 90,
+          "s": 92,
+          "k": 90
+        },
+        {
+          "run": 4,
+          "llm_technical": 85,
+          "full_overall": 89,
+          "t": 88,
+          "c": 85,
+          "r": 90,
+          "s": 92,
+          "k": 94
+        },
+        {
+          "run": 5,
+          "llm_technical": 85,
+          "full_overall": 89,
+          "t": 88,
+          "c": 85,
+          "r": 90,
+          "s": 92,
+          "k": 94
+        }
+      ]
+    },
+    {
+      "question_id": "Q5_SYS",
+      "answer_id": "Q5_B_Weak",
+      "quality": "Weak",
+      "question": "Why do we use caching in distributed systems?",
+      "answer": "Caching is used so websites load fast without hitting MySQL repeatedly. You put Redis in between the client and server to keep frequent data in RAM.",
+      "llm_only": {
+        "scores": [
+          55,
+          45,
+          45,
+          55,
+          55
+        ],
+        "mean": 51.0,
+        "std": 4.9
+      },
+      "five_factor_rubric": {
+        "scores": [
+          53,
+          56,
+          49,
+          55,
+          47
+        ],
+        "mean": 52.0,
+        "std": 3.46
+      },
+      "runs": [
+        {
+          "run": 1,
+          "llm_technical": 55,
+          "full_overall": 53,
+          "t": 55,
+          "c": 35,
+          "r": 65,
+          "s": 76,
+          "k": 32
+        },
+        {
+          "run": 2,
+          "llm_technical": 45,
+          "full_overall": 56,
+          "t": 55,
+          "c": 45,
+          "r": 70,
+          "s": 76,
+          "k": 36
+        },
+        {
+          "run": 3,
+          "llm_technical": 45,
+          "full_overall": 49,
+          "t": 45,
+          "c": 40,
+          "r": 60,
+          "s": 76,
+          "k": 30
+        },
+        {
+          "run": 4,
+          "llm_technical": 55,
+          "full_overall": 55,
+          "t": 55,
+          "c": 45,
+          "r": 70,
+          "s": 76,
+          "k": 30
+        },
+        {
+          "run": 5,
+          "llm_technical": 55,
+          "full_overall": 47,
+          "t": 45,
+          "c": 30,
+          "r": 55,
+          "s": 76,
+          "k": 34
+        }
+      ]
+    }
+  ]
+}

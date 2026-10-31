@@ -8,6 +8,7 @@ Handles multi-page layout, long answers, tables spanning pages, and safe fallbac
 
 import io
 import html
+import re
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
@@ -22,6 +23,7 @@ from reportlab.platypus import (
     TableStyle,
     KeepTogether,
     HRFlowable,
+    Preformatted,
 )
 from reportlab.pdfgen import canvas
 from reportlab.graphics.shapes import Drawing, Rect, String, Line
@@ -93,6 +95,54 @@ class NumberedCanvas(canvas.Canvas):
         # Left footer: System & Date
         date_str = datetime.now(timezone.utc).strftime("%B %d, %Y")
         self.drawString(36, 26, f"SmartInterview Automated Diagnostic Report  |  Generated {date_str}")
+
+        # Right footer: Page X of Y
+        page_str = f"Page {self._pageNumber} of {page_count}"
+        self.drawRightString(576, 26, page_str)
+        self.restoreState()
+
+
+class StudyNotesNumberedCanvas(canvas.Canvas):
+    """
+    Two-pass canvas for Adaptive Study Notes PDF.
+    Dynamic running header and footer with total page count.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._saved_page_states = []
+
+    def showPage(self):
+        self._saved_page_states.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        num_pages = len(self._saved_page_states)
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
+            self.draw_page_decorations(num_pages)
+            super().showPage()
+        super().save()
+
+    def draw_page_decorations(self, page_count: int):
+        self.saveState()
+        self.setFont("Helvetica", 8)
+        self.setFillColor(COLOR_SLATE_MUTED)
+
+        # Header (pages > 1)
+        if self._pageNumber > 1:
+            self.drawString(36, 756, "SmartInterview — Adaptive Mastery & Study Guide")
+            self.setStrokeColor(COLOR_BORDER)
+            self.setLineWidth(0.5)
+            self.line(36, 750, 576, 750)
+
+        # Footer (all pages)
+        self.setStrokeColor(COLOR_BORDER)
+        self.setLineWidth(0.5)
+        self.line(36, 38, 576, 38)
+
+        # Left footer: System & Date
+        date_str = datetime.now(timezone.utc).strftime("%B %d, %Y")
+        self.drawString(36, 26, f"SmartInterview Verified Revision Notes  |  Generated {date_str}")
 
         # Right footer: Page X of Y
         page_str = f"Page {self._pageNumber} of {page_count}"
@@ -604,13 +654,16 @@ def generate_interview_pdf_report(db: Session, user: User, session_id: int) -> b
         q_card.append(ch_table)
 
         # Question prompt
-        q_body_rows = [
-            [Paragraph("<b>Question:</b>", table_header_style), Paragraph(q_text, card_text_style)],
-            [Paragraph("<b>Candidate Answer:</b>", table_header_style), Paragraph(a_text, card_text_style)],
-        ]
+        q_card.append(Spacer(1, 4))
+        q_card.append(Paragraph("<b>Question:</b>", table_header_style))
+        q_card.append(Paragraph(q_text, card_text_style))
+        q_card.append(Spacer(1, 6))
+
+        q_card.append(Paragraph("<b>Candidate Answer:</b>", table_header_style))
+        q_card.append(Paragraph(a_text, card_text_style))
+        q_card.append(Spacer(1, 6))
 
         if ev:
-            # Dimension score snippet
             score_summary = (
                 f"Technical: <b>{ev.get('technical_score')}%</b>  |  "
                 f"Completeness: <b>{ev.get('completeness_score')}%</b>  |  "
@@ -618,44 +671,28 @@ def generate_interview_pdf_report(db: Session, user: User, session_id: int) -> b
                 f"Similarity: <b>{ev.get('semantic_similarity_score')}%</b>  |  "
                 f"Concepts: <b>{ev.get('concept_coverage_score')}%</b>"
             )
-            q_body_rows.append([
-                Paragraph("<b>Sub-Scores:</b>", table_header_style),
-                Paragraph(score_summary, card_text_style)
-            ])
+            q_card.append(Paragraph("<b>Sub-Scores:</b>", table_header_style))
+            q_card.append(Paragraph(score_summary, card_text_style))
+            q_card.append(Spacer(1, 6))
 
             fb = safe_text(ev.get("feedback"))
             if fb:
-                q_body_rows.append([
-                    Paragraph("<b>Feedback:</b>", table_header_style),
-                    Paragraph(fb, card_text_style)
-                ])
+                q_card.append(Paragraph("<b>Feedback:</b>", table_header_style))
+                q_card.append(Paragraph(fb, card_text_style))
+                q_card.append(Spacer(1, 6))
 
-            # Concepts found vs expected if recorded
             concepts_exp = [safe_text(c) for c in (ev.get("concepts_expected") or []) if c]
             concepts_fnd = [safe_text(c) for c in (ev.get("concepts_found") or []) if c]
             if concepts_exp:
                 c_str = f"Expected: {', '.join(concepts_exp)} | Demonstrated: {', '.join(concepts_fnd) if concepts_fnd else 'None'}"
-                q_body_rows.append([
-                    Paragraph("<b>Key Concepts:</b>", table_header_style),
-                    Paragraph(c_str, card_text_style)
-                ])
+                q_card.append(Paragraph("<b>Key Concepts:</b>", table_header_style))
+                q_card.append(Paragraph(c_str, card_text_style))
+                q_card.append(Spacer(1, 6))
 
-        qb_table = Table(q_body_rows, colWidths=[110, 420])
-        qb_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), COLOR_SLATE_LIGHT),
-            ("BOX", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
-            ("INNERGRID", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-        ]))
-        q_card.append(qb_table)
-        q_card.append(Spacer(1, 8))
+        q_card.append(Spacer(1, 15))
 
-        # Keep individual question cards together when possible, allowing multi-page flow
-        story.append(KeepTogether(q_card))
+        for item in q_card:
+            story.append(item)
 
     # ─────────────────────────────────────────────────────────
     # 7. AGGREGATED STRENGTHS & AREAS FOR IMPROVEMENT
@@ -773,4 +810,398 @@ def generate_interview_pdf_report(db: Session, user: User, session_id: int) -> b
 
     # Build the document
     doc.build(story, canvasmaker=NumberedCanvas)
+    return buffer.getvalue()
+
+
+# ─────────────────────────────────────────────────────────
+# STUDY NOTES PDF GENERATOR
+# ─────────────────────────────────────────────────────────
+
+def _clean_markdown_text(text: str) -> str:
+    """Normalize unicode characters for ReportLab standard fonts to prevent encoding errors."""
+    if not text:
+        return ""
+    text = text.replace("\u202f", " ").replace("\u00a0", " ")
+    text = text.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+    text = text.replace("–", "-").replace("—", "-")
+    emoji_map = {
+        "🎯": "[FOCUS] ",
+        "⚠️": "[WATCH OUT] ",
+        "💡": "[KEY INSIGHT] ",
+        "💻": "[IMPLEMENTATION] ",
+        "🔥": "[INTERVIEW TRAP] ",
+        "📚": "[REFERENCE] ",
+        "📌": "[NOTE] ",
+        "🎉": "",
+        "🧠": "",
+        "📖": "",
+    }
+    for em, rep in emoji_map.items():
+        text = text.replace(em, rep)
+    return text
+
+
+def _format_inline_markdown(text: str) -> str:
+    cleaned = _clean_markdown_text(text)
+    escaped = html.escape(cleaned)
+    escaped = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', escaped)
+    escaped = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', escaped)
+    escaped = re.sub(r'`(.+?)`', r'<font face="Courier" color="#3730A3"><b>\1</b></font>', escaped)
+    return escaped
+
+
+def _parse_notes_markdown_to_flowables(markdown_text: str, styles: dict) -> list:
+    flowables = []
+    lines = markdown_text.splitlines()
+    i = 0
+    n = len(lines)
+
+    while i < n:
+        line = lines[i].strip()
+        if not line:
+            i += 1
+            continue
+
+        if line.startswith("---") or line.startswith("***"):
+            flowables.append(HRFlowable(color=COLOR_BORDER, thickness=0.5, spaceBefore=8, spaceAfter=8))
+            i += 1
+            continue
+
+        if line.startswith("## "):
+            header_text = _format_inline_markdown(line[3:].strip())
+            p = Paragraph(f"<b>{header_text}</b>", styles["topic_h2"])
+            t = Table([[p]], colWidths=[540])
+            t.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, -1), COLOR_PRIMARY_LIGHT),
+                ("BOX", (0, 0), (-1, -1), 1, COLOR_PRIMARY),
+                ("LINEBEFORE", (0, 0), (0, -1), 4, COLOR_PRIMARY_DARK),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ]))
+            flowables.append(Spacer(1, 10))
+            flowables.append(t)
+            flowables.append(Spacer(1, 6))
+            i += 1
+            continue
+
+        if line.startswith("### "):
+            sec_text = line[4:].strip()
+            sec_bg = colors.HexColor("#F1F5F9")
+            sec_border = colors.HexColor("#CBD5E1")
+            sec_text_color = COLOR_SLATE_DARK
+
+            sec_lower = sec_text.lower()
+            if "⚠️" in sec_text or "lose marks" in sec_lower or "pitfall" in sec_lower or "watch out" in sec_lower:
+                sec_bg = COLOR_DANGER_BG
+                sec_border = colors.HexColor("#FECDD3")
+                sec_text_color = colors.HexColor("#991B1B")
+            elif "🎯" in sec_text or "concept" in sec_lower or "focus" in sec_lower:
+                sec_bg = COLOR_PRIMARY_LIGHT
+                sec_border = colors.HexColor("#C7D2FE")
+                sec_text_color = COLOR_PRIMARY_DARK
+            elif "💡" in sec_text or "key point" in sec_lower or "insight" in sec_lower:
+                sec_bg = COLOR_SUCCESS_BG
+                sec_border = colors.HexColor("#A7F3D0")
+                sec_text_color = colors.HexColor("#065F46")
+            elif "🔥" in sec_text or "trap" in sec_lower:
+                sec_bg = COLOR_WARNING_BG
+                sec_border = colors.HexColor("#FDE68A")
+                sec_text_color = colors.HexColor("#92400E")
+            elif "💻" in sec_text or "implementation" in sec_lower or "code" in sec_lower:
+                sec_bg = COLOR_SLATE_DARK
+                sec_border = colors.HexColor("#1E293B")
+                sec_text_color = colors.HexColor("#FFFFFF")
+
+            formatted_sec = _format_inline_markdown(sec_text)
+            sec_p = Paragraph(f"<b>{formatted_sec}</b>", ParagraphStyle(
+                "SecP", parent=styles["Normal"],
+                fontName="Helvetica-Bold", fontSize=9, leading=12, textColor=sec_text_color
+            ))
+            sec_t = Table([[sec_p]], colWidths=[540])
+            sec_t.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, -1), sec_bg),
+                ("BOX", (0, 0), (-1, -1), 0.75, sec_border),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+            ]))
+            flowables.append(Spacer(1, 6))
+            flowables.append(sec_t)
+            flowables.append(Spacer(1, 4))
+            i += 1
+            continue
+
+        if line.startswith("```"):
+            lang = line[3:].strip() or "PYTHON"
+            code_lines = []
+            i += 1
+            while i < n and not lines[i].strip().startswith("```"):
+                code_lines.append(_clean_markdown_text(lines[i]))
+                i += 1
+            if i < n:
+                i += 1
+            
+            raw_code = "\n".join(code_lines)
+            code_pre = Preformatted(raw_code, styles["code_style"])
+            code_t = Table(
+                [[Paragraph(f"<font color='#818CF8'><b>[{lang.upper()}]  GOLD-STANDARD IMPLEMENTATION</b></font>", styles["code_header"])],
+                 [code_pre]],
+                colWidths=[540]
+            )
+            code_t.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#0F172A")),
+                ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#1E293B")),
+                ("LINEBELOW", (0, 0), (-1, 0), 0.5, colors.HexColor("#1E293B")),
+                ("TOPPADDING", (0, 0), (-1, 0), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 3),
+                ("TOPPADDING", (0, 1), (-1, 1), 6),
+                ("BOTTOMPADDING", (0, 1), (-1, 1), 6),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+            ]))
+            flowables.append(Spacer(1, 4))
+            flowables.append(code_t)
+            flowables.append(Spacer(1, 6))
+            continue
+
+        if line.startswith("|") and "|" in line[1:]:
+            table_raw_rows = []
+            while i < n and lines[i].strip().startswith("|"):
+                row_str = lines[i].strip()
+                if not re.match(r"^\|(\s*:?-+:?\s*\|)+$", row_str):
+                    cells = [c.strip() for c in row_str.strip("|").split("|")]
+                    table_raw_rows.append(cells)
+                i += 1
+
+            if table_raw_rows:
+                num_cols = max(len(r) for r in table_raw_rows)
+                norm_rows = []
+                for idx, r in enumerate(table_raw_rows):
+                    padded = r + [""] * (num_cols - len(r))
+                    row_cells = []
+                    for c_idx, cell_text in enumerate(padded):
+                        fmt = _format_inline_markdown(cell_text)
+                        style_to_use = styles["table_header"] if idx == 0 else styles["table_cell"]
+                        row_cells.append(Paragraph(fmt, style_to_use))
+                    norm_rows.append(row_cells)
+
+                col_widths = [540.0 / num_cols] * num_cols
+                if num_cols == 3:
+                    col_widths = [130, 200, 210]
+                elif num_cols == 2:
+                    col_widths = [180, 360]
+
+                rl_table = Table(norm_rows, colWidths=col_widths, repeatRows=1)
+                t_styles = [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F1F5F9")),
+                    ("BOX", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 5),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                ]
+                for r_i in range(1, len(norm_rows)):
+                    bg = colors.HexColor("#FFFFFF") if r_i % 2 == 1 else colors.HexColor("#F8FAFC")
+                    t_styles.append(("BACKGROUND", (0, r_i), (-1, r_i), bg))
+                rl_table.setStyle(TableStyle(t_styles))
+                flowables.append(Spacer(1, 4))
+                flowables.append(rl_table)
+                flowables.append(Spacer(1, 6))
+            continue
+
+        if line.startswith("- ") or line.startswith("* ") or (len(line) > 2 and line[0].isdigit() and line[1] in [".", ")"]):
+            bullet_text = re.sub(r"^[-*]\s+|\d+[.)]\s+", "", line).strip()
+            fmt = _format_inline_markdown(bullet_text)
+            p = Paragraph(f"&bull;&nbsp;&nbsp;{fmt}", styles["bullet_style"])
+            flowables.append(p)
+            i += 1
+            continue
+
+        fmt = _format_inline_markdown(line)
+        flowables.append(Paragraph(fmt, styles["body_style"]))
+        flowables.append(Spacer(1, 3))
+        i += 1
+
+    return flowables
+
+
+def generate_remediation_notes_pdf(db: Session, user: User, session_id: int) -> bytes:
+    """
+    Generate a complete, publication-grade downloadable PDF of the AI Study Notes
+    and diagnostic remediation guide for the given interview session.
+    """
+    session = db.query(InterviewSession).filter(
+        InterviewSession.id == session_id,
+        InterviewSession.user_id == user.id,
+    ).first()
+    if not session:
+        raise ValueError("Interview session not found")
+
+    from app.services.remediation_service import diagnose_session, generate_remediation_notes
+
+    diagnosis = diagnose_session(db, user.id, session_id)
+    notes_data = generate_remediation_notes(db, user.id, session_id)
+    notes_markdown = notes_data.get("notes_markdown", "")
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=36,
+        rightMargin=36,
+        topMargin=46,
+        bottomMargin=50,
+    )
+
+    base_styles = getSampleStyleSheet()
+
+    styles = {
+        "Normal": base_styles["Normal"],
+        "title": ParagraphStyle(
+            "NotesTitle",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=18,
+            leading=22,
+            textColor=COLOR_SLATE_DARK,
+        ),
+        "subtitle": ParagraphStyle(
+            "NotesSubtitle",
+            parent=base_styles["Normal"],
+            fontName="Helvetica",
+            fontSize=9.5,
+            leading=13,
+            textColor=COLOR_SLATE_MUTED,
+        ),
+        "topic_h2": ParagraphStyle(
+            "TopicH2",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=12,
+            leading=15,
+            textColor=COLOR_PRIMARY_DARK,
+        ),
+        "body_style": ParagraphStyle(
+            "NotesBody",
+            parent=base_styles["Normal"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            leading=12.5,
+            textColor=COLOR_SLATE_TEXT,
+        ),
+        "bullet_style": ParagraphStyle(
+            "NotesBullet",
+            parent=base_styles["Normal"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            leading=12.5,
+            leftIndent=12,
+            textColor=COLOR_SLATE_TEXT,
+            spaceAfter=2,
+        ),
+        "code_header": ParagraphStyle(
+            "CodeHeader",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=7.5,
+            leading=10,
+            textColor=colors.HexColor("#818CF8"),
+        ),
+        "code_style": ParagraphStyle(
+            "CodePre",
+            parent=base_styles["Normal"],
+            fontName="Courier",
+            fontSize=7.5,
+            leading=10.5,
+            textColor=colors.HexColor("#E2E8F0"),
+        ),
+        "table_header": ParagraphStyle(
+            "TableH",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=7.5,
+            leading=10.5,
+            textColor=COLOR_SLATE_DARK,
+        ),
+        "table_cell": ParagraphStyle(
+            "TableC",
+            parent=base_styles["Normal"],
+            fontName="Helvetica",
+            fontSize=7.5,
+            leading=10.5,
+            textColor=COLOR_SLATE_TEXT,
+        ),
+    }
+
+    story = []
+
+    # 1. Header banner
+    story.append(Paragraph("SmartInterview — Adaptive Mastery & Study Guide", styles["title"]))
+    date_str = datetime.now(timezone.utc).strftime("%B %d, %Y")
+    diff_str = (session.difficulty or "Medium").capitalize()
+    mode_str = (session.mode or "Technical KB").capitalize()
+    story.append(Paragraph(
+        f"Session #{session_id}  |  Difficulty: <b>{diff_str}</b>  |  Mode: <b>{mode_str}</b>  |  Date: {date_str}",
+        styles["subtitle"]
+    ))
+    story.append(Spacer(1, 8))
+    story.append(HRFlowable(color=COLOR_PRIMARY, thickness=1.5, spaceBefore=2, spaceAfter=8))
+
+    # 2. Executive Metadata & Diagnosis Summary Card
+    weak_count = len(diagnosis.get("weak_topics", []))
+    borderline_count = len(diagnosis.get("borderline_topics", []))
+    strong_count = len(diagnosis.get("strong_topics", []))
+    weak_skills_str = ", ".join([t["skill"] for t in diagnosis.get("weak_topics", [])]) or "None"
+
+    diag_summary_data = [
+        [
+            Paragraph("<b>Diagnostic Status:</b>", styles["body_style"]),
+            Paragraph(f"<font color='#DC2626'><b>{weak_count} Weak</b> (&lt;65%)</font>  |  "
+                      f"<font color='#D97706'><b>{borderline_count} Borderline</b></font>  |  "
+                      f"<font color='#059669'><b>{strong_count} Mastered</b> (&ge;75%)</font>", styles["body_style"]),
+        ],
+        [
+            Paragraph("<b>Target Revision Topics:</b>", styles["body_style"]),
+            Paragraph(f"<b>{weak_skills_str}</b>", styles["body_style"]),
+        ],
+        [
+            Paragraph("<b>Verified Knowledge Base:</b>", styles["body_style"]),
+            Paragraph(notes_data.get("source_label", "SmartInterview Technical KB (8 Domains) — Zero Synthetic Data"), styles["body_style"]),
+        ],
+    ]
+    diag_table = Table(diag_summary_data, colWidths=[140, 400])
+    diag_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), COLOR_SLATE_LIGHT),
+        ("BOX", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.append(diag_table)
+    story.append(Spacer(1, 10))
+
+    # 3. Parse Markdown notes into story flowables
+    if notes_markdown:
+        flowables = _parse_notes_markdown_to_flowables(notes_markdown, styles)
+        story.extend(flowables)
+    else:
+        story.append(Paragraph("<i>All skills were mastered in this session. No remediation notes generated.</i>", styles["body_style"]))
+
+    story.append(Spacer(1, 12))
+    story.append(HRFlowable(color=COLOR_BORDER, thickness=0.5, spaceBefore=4, spaceAfter=8))
+
+    # 4. Footer disclaimer
+    disclaimer = (
+        "<i>Notice: These personalized study notes were dynamically compiled from the verified SmartInterview knowledge base "
+        f"addressing specific rubric deficits observed in Session #{session_id}. Retest sessions strictly focus on diagnosed weak areas.</i>"
+    )
+    story.append(Paragraph(disclaimer, ParagraphStyle("DiscP", parent=styles["Normal"], fontName="Helvetica-Oblique", fontSize=7, leading=9.5, textColor=COLOR_SLATE_MUTED)))
+
+    doc.build(story, canvasmaker=StudyNotesNumberedCanvas)
     return buffer.getvalue()

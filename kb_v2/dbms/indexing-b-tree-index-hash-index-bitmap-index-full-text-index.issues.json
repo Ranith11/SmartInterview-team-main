@@ -1,0 +1,35 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "Hash indexes give O(1) look\u2011ups only for pure equality predicates.",
+   "problem": "The statement is correct; however, the source claims that hash indexes are always faster than B\u2011Trees, which is a misconception. Hash indexes cannot handle range queries and may degrade to O(N) in worst case, so they are not universally faster.",
+   "severity": "medium",
+   "fix": "Clarify that hash indexes provide O(1) average\u2011case equality look\u2011ups but are unsuitable for range scans and can suffer from collisions. Do not state they are always faster than B\u2011Trees."
+  },
+  {
+   "claim": "Bitmap indexes are just compressed B\u2011Trees.",
+   "problem": "Bitmap indexes are not compressed B\u2011Trees; they store bit vectors per distinct value and support set operations. The source incorrectly equates them with compressed B\u2011Trees.",
+   "severity": "medium",
+   "fix": "Explain that bitmap indexes use bitmaps per distinct value and are efficient for low\u2011cardinality columns, not compressed B\u2011Trees."
+  },
+  {
+   "claim": "Full\u2011text indexes replace normal indexes for all string columns.",
+   "problem": "Full\u2011text indexes are specialized for token search and are not a replacement for normal indexes on string columns used for equality or prefix searches. The source incorrectly suggests they replace normal indexes.",
+   "severity": "medium",
+   "fix": "State that full\u2011text indexes are complementary to normal indexes and are used only for full\u2011text search scenarios."
+  },
+  {
+   "claim": "A clustered B\u2011Tree index automatically speeds up every query on the table.",
+   "problem": "Clustered indexes only speed up queries that can exploit the physical ordering (e.g., range scans, primary\u2011key look\u2011ups). They do not benefit queries on unrelated columns. The source\u2019s claim is misleading.",
+   "severity": "medium",
+   "fix": "Clarify that clustered indexes improve performance only for queries that can use the physical order; other queries still need appropriate non\u2011clustered indexes."
+  },
+  {
+   "claim": "Adding more indexes always improves read performance.",
+   "problem": "Adding indexes incurs write overhead and storage costs; over\u2011indexing can degrade overall throughput, especially in write\u2011heavy workloads. The source\u2019s claim is incorrect.",
+   "severity": "medium",
+   "fix": "Explain that while indexes can improve read performance, they also increase write costs and storage, so indexes should be added judiciously."
+  }
+ ]
+}

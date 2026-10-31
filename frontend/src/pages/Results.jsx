@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { BarChart3, Brain, Target, CheckCircle, ArrowLeft, Lightbulb, Loader2, AlertCircle, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { BarChart3, Brain, Target, CheckCircle, ArrowLeft, ArrowRight, Lightbulb, Loader2, AlertCircle, ChevronDown, ChevronUp, Download, Sparkles, BookOpen, Trophy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api from '../services/api';
@@ -13,6 +13,7 @@ export default function Results() {
   const [error, setError] = useState('');
   const [expandedQ, setExpandedQ] = useState(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [diagnosis, setDiagnosis] = useState(null);
 
   useEffect(() => { loadResults(); }, [id]);
 
@@ -20,6 +21,12 @@ export default function Results() {
     try {
       const res = await api.get(`/interviews/${id}/results`);
       setResults(res.data);
+      try {
+        const diagRes = await api.get(`/interviews/${id}/remediation/diagnosis`);
+        setDiagnosis(diagRes.data);
+      } catch (dErr) {
+        console.debug('Remediation diagnosis unavailable:', dErr);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load results');
     } finally {
@@ -106,7 +113,7 @@ export default function Results() {
             <span className="text-sm font-semibold text-slate-600">{questions.length} questions answered</span>
             <span className="text-slate-300">•</span>
             <span className="badge badge-indigo capitalize shadow-sm px-3 py-1">
-              {session.completion_reason ? session.completion_reason.replace(/_/g, ' ') : 'Manual Completion'}
+              {session.completion_reason === 'manual' ? 'Manual Completion' : session.completion_reason ? session.completion_reason.replace(/_/g, ' ') : 'Completed'}
             </span>
           </div>
         </div>
@@ -144,6 +151,52 @@ export default function Results() {
           <Link to="/setup" className="btn btn-primary shadow-sm">
             Start New Interview
           </Link>
+        </div>
+      )}
+
+      {/* Remedial Mastery Callout Card */}
+      {hasEvaluations && diagnosis && !diagnosis.all_mastered && diagnosis.weak_topics?.length > 0 && (
+        <div className="rounded-2xl border border-rose-200/80 overflow-hidden mb-6"
+          style={{ boxShadow: '0 2px 12px rgba(244,63,94,0.08), 0 1px 4px rgba(244,63,94,0.06)' }}>
+          <div className="h-1 bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400" />
+          <div className="bg-gradient-to-br from-rose-50/80 via-white to-amber-50/40 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                <Target size={20} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full border border-rose-200">
+                    Adaptive Mastery Engine
+                  </span>
+                </div>
+                <h3 className="text-base font-extrabold text-slate-900">
+                  Review Weak Areas &amp; Take a Focused Retest
+                </h3>
+                <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                  Get AI-powered study notes from the{' '}
+                  <span className="font-semibold text-slate-700">
+                    {session?.mode === 'syllabus' ? 'your uploaded syllabus' : 'verified technical knowledge base'}
+                  </span>
+                  , then retry with questions targeting only your weak areas.
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {diagnosis.weak_topics.map(t => (
+                    <span key={t.skill} className="text-[11px] font-semibold bg-rose-100/80 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-full">
+                      {t.skill} · {t.average_score}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <Link
+              to={`/remediation/${id}`}
+              className="btn text-sm font-bold shadow-md hover:shadow-lg hover:brightness-105 active:scale-[0.98] px-5 py-2.5 flex items-center gap-2 flex-shrink-0 whitespace-nowrap cursor-pointer text-white transition-all no-underline"
+              style={{ background: 'linear-gradient(135deg, #e11d48, #f59e0b)' }}
+            >
+              <Target size={15} /> Master Weak Areas &amp; Study Guide <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       )}
 
@@ -385,7 +438,19 @@ export default function Results() {
       {/* Footer Actions */}
       <div className="flex flex-wrap items-center gap-3 justify-center pt-2 pb-12">
         <Link to="/dashboard" className="btn btn-secondary shadow-sm px-6">Dashboard</Link>
-        <Link to="/setup" className="btn btn-primary shadow-md px-6">New Interview</Link>
+        {diagnosis && !diagnosis.all_mastered && diagnosis.weak_topics?.length > 0 ? (
+          <>
+            <Link
+              to={`/remediation/${id}`}
+              className="btn bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white font-bold shadow-md px-6 flex items-center gap-2 cursor-pointer no-underline"
+            >
+              <Target size={16} /> Master Weak Areas &amp; Retest ({diagnosis.weak_topics.length})
+            </Link>
+            <Link to="/setup" className="btn btn-secondary shadow-sm px-6">New Full Interview</Link>
+          </>
+        ) : (
+          <Link to="/setup" className="btn btn-primary shadow-md px-6">New Interview</Link>
+        )}
       </div>
     </div>
   );

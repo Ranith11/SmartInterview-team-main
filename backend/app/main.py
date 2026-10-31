@@ -12,6 +12,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import auth, resumes, interviews, users, job_descriptions
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request
 
 app = FastAPI(
     title="SmartInterview API",
@@ -35,6 +38,14 @@ app.include_router(job_descriptions.router)
 app.include_router(interviews.router)
 app.include_router(users.router)
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    print(f"422 ERROR: {exc.errors()}")
+    print(f"BODY: {exc.body}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": exc.body},
+    )
 
 @app.get("/api/health")
 def health_check():

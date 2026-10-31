@@ -4,6 +4,7 @@ Loads all settings from the project-root .env file.
 """
 
 import os
+from typing import Any
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -17,10 +18,21 @@ DATABASE_URL = os.getenv(
     "mysql+pymysql://root:root@localhost:3306/smartinterview"
 )
 
+# ── Redis ─────────────────────────────────────────────────
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
 # ── JWT ───────────────────────────────────────────────────
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-production")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-JWT_EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "1440"))
+# ── JWT ───────────────────────────────────────────────────
+JWT_SECRET_KEY = (
+    os.getenv("JWT_SECRET_KEY")
+    or os.getenv("SECRET_KEY")
+    or "dev-secret-change-in-production"
+)
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM") or os.getenv("ALGORITHM", "HS256")
+JWT_EXPIRATION_MINUTES = int(
+    os.getenv("JWT_EXPIRATION_MINUTES")
+    or os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")
+)
 
 # ── Groq / AI ────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
@@ -39,6 +51,161 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 SYLLABUS_UPLOAD_DIR = PROJECT_ROOT / "uploads" / "syllabi"
 SYLLABUS_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-CHROMA_DB_DIR = str(PROJECT_ROOT / "chroma_db")
+_raw_chroma_dir = os.getenv("CHROMA_DB_DIR", "chroma_db")
+if os.path.isabs(_raw_chroma_dir):
+    CHROMA_DB_DIR = str(Path(_raw_chroma_dir).resolve())
+else:
+    CHROMA_DB_DIR = str((PROJECT_ROOT / _raw_chroma_dir).resolve())
+
 PROMPTS_FILE = str(PROJECT_ROOT / "prompts" / "question_generation.json")
 SCRIPTS_DIR = str(PROJECT_ROOT / "scripts")
+
+# ── RAG Mode (Hybrid Graph RAG — Phase 1+) ────────────────
+# Controls which retrieval strategy question_service.py uses.
+#
+# Available values:
+#   dense    — ChromaDB dense vector retrieval only (DEFAULT, existing system)
+#   keyword  — BM25 keyword retrieval only (Phase 7)
+#   graph    — Neo4j graph retrieval only (Phase 6)
+#   hybrid   — Dense + Keyword + Graph fusion (Phase 8+)
+#
+# The existing system is always available as fallback when RAG_MODE=dense.
+RAG_MODE = os.getenv("RAG_MODE", "dense").lower().strip()
+
+# ── Neo4j Knowledge Graph (Phase 5+) ─────────────────────
+# Credentials must come from environment variables.
+NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
+# Storage backend: "auto" (tries Neo4j, falls back to NetworkX), "neo4j", or "networkx"
+GRAPH_STORAGE_BACKEND = os.getenv("GRAPH_STORAGE_BACKEND", "auto").lower().strip()
+
+# ── Hybrid Retrieval (Phase 8+) ──────────────────────────
+# Fusion method: "weighted" (weighted linear combination) or "rrf" (Reciprocal Rank Fusion)
+HYBRID_FUSION_METHOD = os.getenv("HYBRID_FUSION_METHOD", "weighted").lower().strip()
+HYBRID_VECTOR_WEIGHT = float(os.getenv("HYBRID_VECTOR_WEIGHT", "0.40"))
+HYBRID_KEYWORD_WEIGHT = float(os.getenv("HYBRID_KEYWORD_WEIGHT", "0.25"))
+HYBRID_GRAPH_WEIGHT = float(os.getenv("HYBRID_GRAPH_WEIGHT", "0.35"))
+HYBRID_RRF_K = int(os.getenv("HYBRID_RRF_K", "60"))
+HYBRID_FETCH_K = int(os.getenv("HYBRID_FETCH_K", "10"))
+
+# ── Reranking (Phase 9+) ─────────────────────────────────
+# Controls whether candidates are reranked before prompt construction.
+RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "true").lower().strip() in {"true", "1", "yes"}
+# Backend: "semantic" (using existing embedding model singleton), "cross_encoder", or "none"
+RERANKER_BACKEND = os.getenv("RERANKER_BACKEND", "semantic").lower().strip()
+RERANKER_MODEL = os.getenv("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+RERANKER_MIN_SCORE = float(os.getenv("RERANKER_MIN_SCORE", "0.0"))
+RERANKER_TOP_K = int(os.getenv("RERANKER_TOP_K", "3"))
+
+
+import re
+from urllib.parse import urlsplit, urlunsplit
+
+def mask_sensitive_url(url: str) -> str:
+    """
+    Safely mask username:password in database/redis URLs for logging.
+    e.g. mysql+pymysql://root:password@localhost:3306/db -> mysql+pymysql://root:****@localhost:3306/db
+    """
+    if not url:
+        return ""
+    try:
+        parsed = urlsplit(url)
+        if parsed.password:
+            netloc = f"{parsed.username or ''}:****@{parsed.hostname or ''}"
+            if parsed.port:
+                netloc += f":{parsed.port}"
+            return urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
+    except Exception:
+        pass
+    # Fallback regex masking
+    return re.sub(r"://([^:@]+):([^@]+)@", r"://\1:****@", url)
+
+
+# ── Configuration Consistency & Security Audit (Phase 11) ─
+
+def validate_config() -> dict[str, Any]:
+    """
+    Perform a security, consistency, and sanity audit on loaded configuration.
+    Returns an audit report dictionary containing findings and status.
+    Fails fast in production when critical secrets or invariants are violated.
+    """
+    findings: list[str] = []
+    warnings: list[str] = []
+
+    is_prod = os.getenv("ENVIRONMENT", "").lower() == "production"
+
+    # 1. JWT Security Audit
+    is_default_secret = JWT_SECRET_KEY in {
+        "dev-secret-change-in-production",
+        "secret",
+        "changeme",
+        "default",
+        "admin",
+    } or len(JWT_SECRET_KEY) < 16
+    if is_default_secret:
+        if is_prod:
+            findings.append("CRITICAL: Using default or weak JWT_SECRET_KEY in production environment!")
+        else:
+            warnings.append("Using default JWT_SECRET_KEY in development environment.")
+
+    if JWT_EXPIRATION_MINUTES <= 0:
+        findings.append(f"Invalid JWT_EXPIRATION_MINUTES: {JWT_EXPIRATION_MINUTES}. Must be > 0.")
+
+    # 2. Database URL Audit
+    if not DATABASE_URL:
+        findings.append("DATABASE_URL is not configured.")
+    elif is_prod and ("root:root" in DATABASE_URL or "localhost" in DATABASE_URL):
+        warnings.append("Default local database credentials detected in production environment.")
+
+    # 3. Redis Audit
+    if not REDIS_URL and is_prod:
+        warnings.append("REDIS_URL is not configured in production environment.")
+
+    # 4. AI / LLM Audit
+    if LLM_PROVIDER == "groq" and not GROQ_API_KEY:
+        warnings.append("GROQ_API_KEY is not set while LLM_PROVIDER is 'groq'.")
+
+
+    # 5. RAG Mode Validation
+    valid_modes = {"dense", "vector", "keyword", "bm25", "graph", "hybrid"}
+    if RAG_MODE not in valid_modes:
+        findings.append(f"Invalid RAG_MODE: '{RAG_MODE}'. Expected one of {sorted(valid_modes)}.")
+
+    # 6. Hybrid Weights Validation
+    if HYBRID_FUSION_METHOD == "weighted":
+        total_weight = HYBRID_VECTOR_WEIGHT + HYBRID_KEYWORD_WEIGHT + HYBRID_GRAPH_WEIGHT
+        if abs(total_weight - 1.0) > 0.05:
+            warnings.append(f"Hybrid retrieval weights do not sum close to 1.0 (sum={round(total_weight, 3)}).")
+
+    if HYBRID_FETCH_K <= 0:
+        findings.append(f"Invalid HYBRID_FETCH_K: {HYBRID_FETCH_K}. Must be > 0.")
+
+    # 7. Storage Backend Validation
+    valid_backends = {"auto", "neo4j", "networkx"}
+    if GRAPH_STORAGE_BACKEND not in valid_backends:
+        findings.append(f"Invalid GRAPH_STORAGE_BACKEND: '{GRAPH_STORAGE_BACKEND}'. Expected one of {sorted(valid_backends)}.")
+
+    # 8. Reranker Backend Validation
+    valid_rerankers = {"semantic", "cross_encoder", "none", "passthrough"}
+    if RERANKER_BACKEND not in valid_rerankers:
+        findings.append(f"Invalid RERANKER_BACKEND: '{RERANKER_BACKEND}'. Expected one of {sorted(valid_rerankers)}.")
+
+    if RERANKER_TOP_K <= 0:
+        findings.append(f"Invalid RERANKER_TOP_K: {RERANKER_TOP_K}. Must be > 0.")
+
+    is_valid = len(findings) == 0
+    return {
+        "is_valid": is_valid,
+        "environment": os.getenv("ENVIRONMENT", "development"),
+        "rag_mode": RAG_MODE,
+        "graph_backend": GRAPH_STORAGE_BACKEND,
+        "reranker_backend": RERANKER_BACKEND,
+        "reranker_enabled": RERANKER_ENABLED,
+        "masked_database_url": mask_sensitive_url(DATABASE_URL),
+        "findings": findings,
+        "warnings": warnings,
+    }
+
+

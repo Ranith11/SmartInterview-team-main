@@ -1,0 +1,11 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "Counting sort, and its application to radix sorting, were both invented by Harold H. Seward in 1954.",
+   "problem": "The invention of counting sort is incorrectly attributed. The algorithm was actually introduced by C.\u202fA.\u202fR. Hoare in 1954 (or earlier by other researchers), not by Harold H. Seward.",
+   "severity": "medium",
+   "fix": "Correct the attribution to the proper inventor(s), e.g., \"Counting sort was introduced by C.\u202fA.\u202fR. Hoare in 1954.\""
+  }
+ ]
+}

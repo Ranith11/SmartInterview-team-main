@@ -14,6 +14,7 @@ import Results from './pages/Results';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import PerformanceDashboard from './pages/PerformanceDashboard';
+import Remediation from './pages/Remediation';
 
 import Sidebar from './components/Sidebar';
 
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/setup" element={<ProtectedRoute><AppLayout><InterviewSetup /></AppLayout></ProtectedRoute>} />
           <Route path="/interview/:id" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
           <Route path="/results/:id" element={<ProtectedRoute><AppLayout><Results /></AppLayout></ProtectedRoute>} />
+          <Route path="/remediation/:id" element={<ProtectedRoute><AppLayout><Remediation /></AppLayout></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><AppLayout><History /></AppLayout></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
           <Route path="/performance" element={<ProtectedRoute><AppLayout><PerformanceDashboard /></AppLayout></ProtectedRoute>} />

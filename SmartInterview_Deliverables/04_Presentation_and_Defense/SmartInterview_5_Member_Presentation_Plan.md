@@ -160,11 +160,11 @@
 >
 > When standard LLMs generate technical interview questions, they often create questions that are overly vague, too trivial, or factually inaccurate. To guarantee technical accuracy, SmartInterview grounds all question generation in a **verified knowledge base**.
 >
-> Our RAG architecture is built upon four technical pillars:
-> 1. **Curated Technical Knowledge Base:** We created a repository of 402 curated text chunks covering 8 foundational CS domains: Data Structures & Algorithms, Operating Systems, DBMS, Computer Networks, System Design, OOP, Design Patterns, and ML/DL.
-> 2. **Local Vector Database:** We use **ChromaDB 0.6.3** with persistent SQLite and Parquet indexing.
-> 3. **Dense Semantic Embeddings:** We use the **`all-MiniLM-L6-v2`** model from SentenceTransformers. It maps queries into 384-dimensional dense vectors locally on CPU with zero API costs.
-> 4. **Rigorous Retrieval Benchmarks:** In empirical testing across technical queries, our retrieval engine achieved a **96.97% Hit@1**, **100% Hit@3**, and a Mean Reciprocal Rank (MRR) of **0.9798**.
+> Our Hybrid Graph RAG architecture is built upon four technical pillars:
+> 1. **Tri-Retrieval Engine:** Instead of vanilla vector search that misses exact technical symbols or acronyms (like '2PL' or 'ACID'), we combine Dense Semantic ChromaDB, Lexical BM25Okapi keyword search, and NetworkX Knowledge Graph prerequisite traversal over 402 curated CS chunks across 8 domains.
+> 2. **Reciprocal Rank Fusion (RRF, k=60):** Fuses rankings mathematically so that neither dense nor lexical retrieval dominates.
+> 3. **Dense Semantic Embeddings:** The local `all-MiniLM-L6-v2` Sentence-BERT model generates 384-dimensional dense vectors on CPU in under 15ms.
+> 4. **Empirical Retrieval Benchmarks:** Across 33 technical domain queries, our pipeline achieved 96.97% Hit@1, 100% Hit@3, and an MRR of 0.9798 with 24.6ms retrieval latency.
 >
 > During an interview, when a skill (like 'DBMS') is selected, we perform a cosine similarity search filtered by that domain. The top-3 reference chunks are retrieved and injected directly into a structured prompt sent to the **Groq Cloud API** running `openai/gpt-oss-120b`. The model is strictly instructed to generate questions grounded in those reference facts."
 
@@ -223,7 +223,8 @@
 > - **Score $50–79$ (Adequate):** Maintain the current Bloom level to consolidate understanding.
 > - **Score $< 50$ (Remediation):** Regress to the previous Bloom level ($L_{i-1}$) or provide a simpler foundational question.
 >
-> To ensure fairness across the entire syllabus, we use a **Weakness-Biased Round-Robin Scheduler**. It tracks running averages per skill and prioritizes struggling topics while ensuring every skill is assessed."
+> To ensure fairness across the entire syllabus, we use a **Weakness-Biased Round-Robin Scheduler**. It tracks running averages per skill and prioritizes struggling topics while ensuring every skill is assessed.">
+> Furthermore, when a candidate completes an interview with unmastered skills, SmartInterview launches **Remedial Mastery Mode**. It performs backward depth-first search along prerequisite edges in our Knowledge Graph, identifies root-cause foundational gaps, generates dynamic AI study guides and interactive flashcards, and provides a 1-click 'Start Focused Retest' action.
 
 ### 2. How to Tell & Live Demo Flow
 - **Screen Action:**
@@ -305,6 +306,18 @@
   *Answer:* "An LLM can occasionally be swayed by verbose phrasing. Mathematical cosine similarity using SentenceTransformers compares candidate embeddings against verified reference knowledge, providing an objective, deterministic check that balances the LLM's qualitative feedback."
 - **Q: How does your PDF generator handle tables or text that span multiple pages?**  
   *Answer:* "We use ReportLab Platypus flowable elements (`Paragraph`, `Table`, `Spacer`, `KeepTogether`) with automatic pagination, coupled with a two-pass `NumberedCanvas` that dynamically computes total pages."
+
+### 3.1 355-Test Verification Matrix Across All 18 Phases
+SmartInterview ensures rock-solid architectural stability through **355 unit and integration tests across 18 phases (100% pass rate in 87.90s)**:
+- Phase 1 (Dense RAG): 25 tests
+- Phase 2–4 (Knowledge Graph): 69 tests
+- Phase 5 (BM25 Engine): 34 tests
+- Phase 6–7 (Graph Traversal & RRF): 48 tests
+- Phase 8 (Reranker & Scoring): 36 tests
+- Phase 9–10 (Pipeline & Bloom Progression): 39 tests
+- Phase 11–13 (Security & Golden Dataset): 48 tests
+- Phase 14–18 (Baseline & Safeguards): 56 tests
+- **Total: 355 Passing Tests**
 
 > **Conclusion (Member 5 to Panel):**  
 > *"To conclude, SmartInterview combines deterministic NLP parsing, verified RAG vector grounding, a pedagogical Bloom's state machine, and multi-factor evaluation to deliver a production-ready mock interview platform. We would be delighted to answer any questions. Thank you!"*

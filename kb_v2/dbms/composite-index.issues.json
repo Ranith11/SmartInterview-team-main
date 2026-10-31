@@ -1,0 +1,17 @@
+{
+ "errors": [],
+ "issues": [
+  {
+   "claim": "The S&P/TSX Composite Index surpassed 30,000 points for the first time and reached an intraday high of 30,066 on September 23, 2025.",
+   "problem": "This statement refers to a future event that has not yet occurred as of the current date (October\u202f2026). No reliable source confirms that the index reached 30,066 points on that date, making the claim unsupported and likely false.",
+   "severity": "high",
+   "fix": "Remove or correct the statement to reflect the actual historical high of the index up to the present date, citing a reputable source such as the Toronto Stock Exchange or S&P Dow Jones Indices."
+  },
+  {
+   "claim": "There are currently no ETFs that match the S&P/TSX Composite Index; however, the iShares S&P/TSX Completion Index Fund (TSX: XMD) combined with the iShares S&P/TSX 60 Index Fund (TSX: XIU) can give equivalent exposure.",
+   "problem": "The claim that no ETFs match the index is contradicted by the existence of ETFs that track the S&P/TSX Composite Index directly, such as the iShares S&P/TSX Capped Composite Index Fund (TSX: XIC) and the BMO S&P/TSX Capped Composite Index Fund (TSX: ZCN).",
+   "severity": "high",
+   "fix": "Revise the statement to acknowledge that ETFs like XIC and ZCN directly track the S&P/TSX Composite Index, and clarify that XMD+XIU provide a composite exposure but are not identical to the index."
+  }
+ ]
+}

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Send, CheckCircle, AlertCircle, Loader2, Brain, BarChart3, 
-  Flag, Mic, Volume2, Square, Play, BrainCircuit
+  Flag, Mic, Volume2, Square, Play, BrainCircuit, Target
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -424,9 +424,15 @@ export default function Interview() {
                 <BrainCircuit size={18} className="text-white" />
               </div>
               <span className="font-bold text-lg text-slate-900 tracking-tight hidden sm:block">SmartInterview</span>
-              <span className="badge badge-indigo ml-2 hidden sm:inline-flex shadow-sm">
-                {session?.mode === 'syllabus' ? 'Syllabus Session' : 'Adaptive Session'}
-              </span>
+              {session?.adaptive_state?.is_remediation ? (
+                <span className="badge bg-gradient-to-r from-rose-500 to-amber-500 text-white ml-2 inline-flex items-center gap-1 shadow-sm font-semibold text-xs py-1 px-2.5">
+                  <Target size={12} /> Focused Retest (Weak Areas)
+                </span>
+              ) : (
+                <span className="badge badge-indigo ml-2 hidden sm:inline-flex shadow-sm">
+                  {session?.mode === 'syllabus' ? 'Syllabus Session' : 'Adaptive Session'}
+                </span>
+              )}
             </div>
             
             <div className="flex items-center gap-4">
@@ -451,6 +457,24 @@ export default function Interview() {
         {currentQuestion && (
           <div className="flex flex-col flex-1 animate-[fadeIn_0.4s_ease-out]">
             
+            {/* Remediation Mode Banner */}
+            {session?.adaptive_state?.is_remediation && (
+              <div className="mb-4 p-3.5 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-rose-200/90 rounded-2xl flex items-center justify-between text-xs text-rose-950 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                    <Target size={14} />
+                  </div>
+                  <span>
+                    <strong>Remedial Mastery Mode:</strong> Focused on{' '}
+                    <span className="font-bold text-rose-700">
+                      {session?.adaptive_state?.targeted_skills?.join(', ') || 'weak areas'}
+                    </span>
+                    . Questions adapt strictly to verify concept recovery.
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Metadata Badges */}
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="badge badge-slate shadow-sm">

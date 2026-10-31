@@ -87,6 +87,9 @@ SmartInterview is architected as a clean, decoupled 4-tier distributed system de
 
 ### 2.1 The Four Architectural Tiers
 
+![Figure 2.1: Decoupled 4-Tier Distributed System Architecture](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Architecture.png)
+*Fig. 2.1. Complete 4-Tier System Architecture of SmartInterview showing decoupled presentation, application, vector persistence, and inference tiers.*
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                       TIER 1: PRESENTATION (FRONTEND)                       │
@@ -432,6 +435,10 @@ SmartInterview integrates a curated ecosystem of modern open-source software lib
 ---
 
 ## PART 5: RELATIONAL DATABASE SCHEMA & DATA DICTIONARY (MYSQL 8.0)
+
+![Figure 5.0: Normalized Relational Entity-Relationship Diagram (ERD)](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/ERD.png)
+*Fig. 5.0. 3NF Relational Entity-Relationship Diagram illustrating users, resumes, job descriptions, sessions, questions, answers, and evaluations.*
+
 
 The relational schema is implemented in MySQL 8.0 using the InnoDB storage engine to guarantee ACID transaction safety. The schema comprises 7 tables with explicit foreign key constraints, indexes, and cascading delete behaviors.
 
@@ -1386,6 +1393,10 @@ The backend exposes a comprehensive RESTful API under the `/api/v1` namespace.
 
 ## PART 21: END-TO-END EXECUTION TRACE & LIFECYCLE WALKTHROUGH
 
+![Figure 21.0: End-to-End Interview Execution & Remediation Workflow](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/SmartInterview_Deliverables/05_System_Diagrams/Workflow.png)
+*Fig. 21.0. Complete Lifecycle Workflow tracing candidate document ingestion, RAG staging, live interview turn execution, multi-signal scoring, and remedial mastery.*
+
+
 To understand how the entire platform operates as a cohesive unit, let us trace a complete, realistic candidate interaction step-by-step from registration to final report generation.
 
 ```
@@ -1548,6 +1559,22 @@ You must answer with absolute clarity: **SmartInterview enforces a strict separa
 ---
 
 ## PART 24: COMPLETE UML & ARCHITECTURAL DIAGRAM SUITE
+
+### 24.0 Live Operational System Interfaces & Screenshot Suite
+Below are verified high-resolution interface captures demonstrating the active production system:
+
+![Figure 24.0A: Candidate Overview & Practice Dashboard](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/04_dashboard.png)
+*Fig. 24.0A. Candidate Practice Dashboard with analytics metrics, interview history, and quick session launch controls.*
+
+![Figure 24.0B: Live Spoken Interview Room with Speech Recognition](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/13_live_interview_session.png)
+*Fig. 24.0B. Live Two-Way Spoken Interview Room displaying active Bloom badge (Level 4: Analyze), neural TTS audio playback, and live speech recognition.*
+
+![Figure 24.0C: Candidate Multi-Factor Performance Scorecard](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/11_results_scorecard.png)
+*Fig. 24.0C. Comprehensive Multi-Signal Evaluation Scorecard with 5-axis competency radar breakdown, question transcripts, and targeted feedback.*
+
+![Figure 24.0D: Remedial Mastery Mode Study Guide & Retest Trigger](file:///c:/Users/kondu/Downloads/Smart-Interview-main%20%281%29/Smart-Interview-main/screenshots/12_remedial_mastery_mode.png)
+*Fig. 24.0D. Remedial Mastery Mode interface displaying Knowledge Graph prerequisite diagnostics, verified textbook excerpts, and 1-click focused retest.*
+
 
 Below are the complete, verified diagram specifications representing all visual models documented in the project SRS, Research Paper, and Presentation decks.
 
@@ -2022,7 +2049,23 @@ SmartInterview builds directly upon four seminal contributions in educational co
 
 ---
 
-## PART 26: SOFTWARE REQUIREMENTS SPECIFICATION (SRS) & IEEE 830 STANDARDS ALIGNMENT
+## PART 26: SOFTWARE REQUIREMENTS SPECIFICATION (SRS), 355-TEST VERIFICATION & IEEE 830 ALIGNMENT
+
+### 26.0 Exhaustive 355-Test Suite Across All 18 Engineering Phases
+SmartInterview enforces architectural determinism through an automated test suite comprising **355 unit, integration, and security tests across all 18 engineering phases** (100% pass rate in 87.90 seconds):
+
+| Phase | Subsystem & Verification Scope | Test Count | Pass Rate | Key Functional Gate Verified |
+| :---: | :--- | :---: | :---: | :--- |
+| **Phase 1** | Dense Vector RAG Baseline & S-BERT Embeddings | 25 | 100% | Cosine similarity bounds & ChromaDB HNSW indexing |
+| **Phase 2–4** | Knowledge Graph Schema, Builder & Storage | 69 | 100% | Prerequisite edge traversal & NetworkX fallback |
+| **Phase 5** | BM25 Lexical Keyword Retrieval Engine | 34 | 100% | Exact symbol & acronym tokenization (ACID, 2PL) |
+| **Phase 6–7** | Graph Traversal & Reciprocal Rank Fusion | 48 | 100% | Tri-retrieval RRF fusion (=60$) & canonical deduplication |
+| **Phase 8** | Cross-Encoder Reranker & Scoring Convergence | 36 | 100% | Multi-signal rubric mathematical convergence |
+| **Phase 9–10** | Pipeline Integration & Bloom's Cognitive Progression | 39 | 100% | Deterministic Bloom escalation ($\ge 80\%$) & regression ($< 50\%$) |
+| **Phase 11–13** | Security Audit, Evaluation Metrics & Golden Dataset | 48 | 100% | Bcrypt auth, SQL injection protection, metric bounds |
+| **Phase 14–18** | Frozen Baseline, Hybrid Evaluation & Edge Safeguards | 56 | 100% | Starvation prevention & corrupt input safety handlers |
+| **Total** | **Comprehensive End-to-End Project Test Suite** | **355** | **100%** | **Full System Integrity Verified in 87.90s** |
+
 
 SmartInterview is engineered in compliance with **IEEE Std 830-1998 (Recommended Practice for Software Requirements Specifications)**.
 
